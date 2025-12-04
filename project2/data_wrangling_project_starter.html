@@ -7584,7 +7584,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [1]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Import statements for packages used in analysis</span>
@@ -7597,7 +7597,13 @@ a.anchor-link {
 <span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sb</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">urllib.parse</span><span class="w"> </span><span class="kn">import</span> <span class="n">urlparse</span>
+
+<span class="c1">## It's OK if this file doesn't exist as the API results are </span>
+<span class="c1">## saved to a file in the project and the API code will check</span>
+<span class="c1">## for the file before using the API key this would retrieve.</span>
+<span class="n">load_dotenv</span><span class="p">(</span><span class="n">dotenv_path</span><span class="o">=</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">expanduser</span><span class="p">(</span><span class="s1">'~/.env'</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 <span class="c1"># Magic word for inline visualizations</span>
 <span class="o">%</span><span class="k">matplotlib</span> inline
@@ -7615,7 +7621,7 @@ a.anchor-link {
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [2]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">## Data gathering functions</span>
@@ -7763,7 +7769,7 @@ TMDb serves as the core theatrical release dataset because it combines financial
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [3]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Load dataset</span>
@@ -7780,7 +7786,7 @@ TMDb serves as the core theatrical release dataset because it combines financial
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[3]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[8]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -7998,7 +8004,7 @@ IMDb's rating system is well-established and trusted, providing an alternative m
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [4]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [11]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Get files via URL download</span>
@@ -8023,12 +8029,15 @@ IMDb's rating system is well-established and trusted, providing an alternative m
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>data/raw/imdb_title_basics.tsv already exists. If you wish to re-download it, set download_if_exists=True
+<pre>Downloading https://datasets.imdbws.com/title.basics.tsv.gz --&gt; data/raw/imdb_title_basics.tsv
+Decompressing gzip content...
+Downloaded 14,516 chunks for file size 214,474,788
+File 'imdb_title_basics.tsv' downloaded successfully from 'https://datasets.imdbws.com/title.basics.tsv.gz'
 </pre>
 </div>
 </div>
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[4]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[11]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -8132,7 +8141,7 @@ IMDb's rating system is well-established and trusted, providing an alternative m
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [5]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Get files via URL download</span>
@@ -8162,7 +8171,7 @@ IMDb's rating system is well-established and trusted, providing an alternative m
 </div>
 </div>
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[5]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[10]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -8276,7 +8285,7 @@ Streaming platforms represent the industry's future, but comprehensive availabil
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [6]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [12]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># I decided to manually load these datasets into the project.</span>
@@ -8294,7 +8303,7 @@ Streaming platforms represent the industry's future, but comprehensive availabil
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[6]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[12]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -8416,7 +8425,7 @@ Streaming platforms represent the industry's future, but comprehensive availabil
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [13]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">disney_plus_titles_raw_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">'data/raw/disney_plus_titles.csv'</span><span class="p">)</span>
@@ -8431,7 +8440,7 @@ Streaming platforms represent the industry's future, but comprehensive availabil
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[7]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[13]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -8553,7 +8562,7 @@ Streaming platforms represent the industry's future, but comprehensive availabil
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [14]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">hulu_titles_raw_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">'data/raw/hulu_titles.csv'</span><span class="p">)</span>
@@ -8568,7 +8577,7 @@ Streaming platforms represent the industry's future, but comprehensive availabil
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[8]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[14]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -8690,7 +8699,7 @@ Streaming platforms represent the industry's future, but comprehensive availabil
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [15]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="n">netflix_titles_raw_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">'data/raw/netflix_titles.csv'</span><span class="p">)</span>
@@ -8705,7 +8714,7 @@ Streaming platforms represent the industry's future, but comprehensive availabil
 </div>
 <div class="jp-OutputArea jp-Cell-outputArea">
 <div class="jp-OutputArea-child jp-OutputArea-executeResult">
-<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[9]:</div>
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[15]:</div>
 <div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
 <div>
 <style scoped="">
@@ -8841,7 +8850,7 @@ Streaming platforms represent the industry's future, but comprehensive availabil
 <li>cpi (float) - Annual average CPI value</li>
 </ul>
 <p><strong>Why this dataset:</strong>
-Inflation has been substantial over the 65-year span of this analysis (1960-2025). A $1 million budget in 1960 equals approximately $10.4 million in 2025 dollars. Without adjustment, financial analysis would be dominated by recency bias, making modern films appear far more expensive than historical films when they may actually be comparable in real terms. The FRED API provides authoritative, regularly-updated data from the U.S. Bureau of Labor Statistics.</p>
+Inflation has been substantial over the 65-year span of this analysis (1960-2025). A \$1 million budget in 1960 equals approximately \$10.4 million in 2025 dollars. Without adjustment, financial analysis would be dominated by recency bias, making modern films appear far more expensive than historical films when they may actually be comparable in real terms. The FRED API provides authoritative, regularly-updated data from the U.S. Bureau of Labor Statistics.</p>
 <p><strong>Significance of variables:</strong></p>
 <ul>
 <li><strong>year/cpi:</strong> Used to calculate inflation multiplier: <code>adjusted_amount = original * (CPI_2025 / CPI_year)</code></li>
@@ -8859,36 +8868,146 @@ revenue_adj_2025 = revenue_original × (CPI_2025 / CPI_release_year)
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [43]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span> 
+<div class="highlight hl-ipython3"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_cpi_data</span><span class="p">(</span><span class="n">start_year</span><span class="o">=</span><span class="mi">1960</span><span class="p">,</span> <span class="n">end_year</span><span class="o">=</span><span class="mi">2025</span><span class="p">,</span> <span class="n">local_filename</span><span class="o">=</span><span class="s1">'cpi_data.json'</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">"data/raw"</span><span class="p">,</span> <span class="n">download_if_exists</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Get CPI data from FRED API</span>
+<span class="sd">    CPI-U (Consumer Price Index for all Urban consumers)</span>
+<span class="sd">    """</span>
+    
+    <span class="n">filepath</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s2">/</span><span class="si">{</span><span class="n">local_filename</span><span class="si">}</span><span class="s2">"</span>
+    
+    <span class="c1"># Get cached data if we have it</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span> <span class="ow">and</span> <span class="n">download_if_exists</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">filepath</span><span class="si">}</span><span class="s2"> already exists. If you wish to re-download it, set download_if_exists=True"</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="n">filepath</span><span class="p">)</span>
+    
+    <span class="n">url</span> <span class="o">=</span> <span class="s1">'https://api.stlouisfed.org/fred/series/observations'</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="s1">'series_id'</span><span class="p">:</span> <span class="s1">'CPIAUCSL'</span><span class="p">,</span>
+        <span class="s1">'api_key'</span><span class="p">:</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">'FRED_API'</span><span class="p">),</span>
+        <span class="s1">'file_type'</span><span class="p">:</span> <span class="s1">'json'</span><span class="p">,</span>
+        <span class="s1">'observation_start'</span><span class="p">:</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">start_year</span><span class="si">}</span><span class="s1">-01-01'</span><span class="p">,</span>
+        <span class="s1">'observation_end'</span><span class="p">:</span> <span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">end_year</span><span class="si">}</span><span class="s1">-12-31'</span><span class="p">,</span>
+        <span class="s1">'frequency'</span><span class="p">:</span> <span class="s1">'a'</span>
+    <span class="p">}</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># Get the data as JSON</span>
+        <span class="n">response</span> <span class="o">=</span> <span class="n">httpx</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="n">params</span><span class="p">)</span>
+        <span class="n">response</span><span class="o">.</span><span class="n">raise_for_status</span><span class="p">()</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">json</span><span class="p">()</span>
+
+        <span class="c1"># Create dataframe</span>
+        <span class="n">cpi_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">data</span><span class="p">[</span><span class="s1">'observations'</span><span class="p">])</span>
+        
+        <span class="c1"># Remove invalid data rows</span>
+        <span class="n">cpi_df</span> <span class="o">=</span> <span class="n">cpi_df</span><span class="p">[</span><span class="n">cpi_df</span><span class="p">[</span><span class="s1">'value'</span><span class="p">]</span> <span class="o">!=</span> <span class="s2">"."</span><span class="p">]</span>
+        
+        <span class="c1"># Transform data</span>
+        <span class="n">cpi_df</span><span class="p">[</span><span class="s1">'year'</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">cpi_df</span><span class="p">[</span><span class="s1">'date'</span><span class="p">])</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">year</span>
+        <span class="n">cpi_df</span><span class="p">[</span><span class="s1">'cpi'</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">cpi_df</span><span class="p">[</span><span class="s1">'value'</span><span class="p">])</span>
+        
+        <span class="n">cpi_df</span> <span class="o">=</span> <span class="n">cpi_df</span><span class="p">[[</span><span class="s1">'year'</span><span class="p">,</span> <span class="s1">'cpi'</span><span class="p">]]</span>
+        
+        <span class="c1"># Cache transformed data to disk</span>
+        <span class="n">cpi_df</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">filepath</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">'records'</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">cpi_df</span>
+        
+    <span class="k">except</span> <span class="n">httpx</span><span class="o">.</span><span class="n">HTTPStatusError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Error during request: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        
+    <span class="k">except</span> <span class="n">httpx</span><span class="o">.</span><span class="n">RequestError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"An error occurred while requesting: </span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p>Optional data storing step: You may save your raw dataset files to the local data store before moving to the next step.</p>
-</div>
-</div>
-</div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [44]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#Optional: store the raw data in your local data store</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">cpi_df</span> <span class="o">=</span> <span class="n">get_cpi_data</span><span class="p">()</span>
+<span class="n">cpi_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
 </pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>data/raw/cpi_data.json already exists. If you wish to re-download it, set download_if_exists=True
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[44]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>year</th>
+<th>cpi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>1960</td>
+<td>29.585</td>
+</tr>
+<tr>
+<th>1</th>
+<td>1961</td>
+<td>29.902</td>
+</tr>
+<tr>
+<th>2</th>
+<td>1962</td>
+<td>30.253</td>
+</tr>
+<tr>
+<th>3</th>
+<td>1963</td>
+<td>30.633</td>
+</tr>
+<tr>
+<th>4</th>
+<td>1964</td>
+<td>31.038</td>
+</tr>
+</tbody>
+</table>
+</div>
 </div>
 </div>
 </div>
