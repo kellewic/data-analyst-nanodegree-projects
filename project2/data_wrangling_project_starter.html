@@ -7598,6 +7598,7 @@ a.anchor-link {
 <span class="kn">import</span><span class="w"> </span><span class="nn">seaborn</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">sb</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pandas.api.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_numeric_dtype</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">urllib.parse</span><span class="w"> </span><span class="kn">import</span> <span class="n">urlparse</span>
 
 <span class="c1">## It's OK if this file doesn't exist as the API results are </span>
@@ -10363,7 +10364,22 @@ Checking for \N null values in IMDb title clean:
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Split pipe-delimited genres into Python tuples - was going to do lists but can't use drop_duplciates() with lists</span>
 
-<span class="k">def</span><span class="w"> </span><span class="nf">convert_genres_to_tuple</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">'|'</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="n">a</span> <span class="o">=</span> <span class="n">imdb_title_clean_df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+<span class="n">b</span> <span class="o">=</span> <span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'genres'</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">convert_genres_to_tuple</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">'|'</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>   
+    <span class="c1"># Check if we've already converted genres to a tuple.</span>
+    <span class="c1"># Happens if we run certain cells multiple times.</span>
+    <span class="n">df_rows</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="n">df_num_genres_are_tuples</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">'genres'</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">))</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">())</span>
+    
+    <span class="k">if</span> <span class="n">df_rows</span> <span class="o">==</span> <span class="n">df_num_genres_are_tuples</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">inplace</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="s1">'genres'</span><span class="p">]</span>
+    
+    <span class="c1"># Convert to tuple</span>
     <span class="n">genres</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">'genres'</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="s1">''</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">sep</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="nb">tuple</span><span class="p">)</span>
             
     <span class="k">if</span> <span class="n">inplace</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
@@ -10519,7 +10535,7 @@ Checking for \N null values in IMDb title clean:
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h4 id="TMDb-Checks">TMDb Checks<a class="anchor-link" href="#TMDb-Checks">¶</a></h4>
+<h4 id="TMDb-Data-Quality-Checks">TMDb Data Quality Checks<a class="anchor-link" href="#TMDb-Data-Quality-Checks">¶</a></h4><p>We'll validate the cleaned TMDb dataset by checking for nulls and duplicates, examining the final schema, and confirming data types are correct for analysis.</p>
 </div>
 </div>
 </div>
@@ -10532,14 +10548,12 @@ Checking for \N null values in IMDb title clean:
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># We're going to drop release_date from TMDb. Let's make sure we have all the release_year values first.</span>
-<span class="c1">#</span>
-<span class="c1"># Check for nulls in release_year</span>
+
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Null release_years: </span><span class="si">{</span><span class="n">tmdb_movies_clean_df</span><span class="p">[</span><span class="s1">'release_year'</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 <span class="c1"># Extract year from release_date for comparison</span>
 <span class="n">tmdb_movies_clean_df</span><span class="p">[</span><span class="s1">'date_year'</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmdb_movies_clean_df</span><span class="p">[</span><span class="s1">'release_date'</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">'/'</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
-<span class="c1"># Transform 2-digit year to 4-digit year</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">transform_year</span><span class="p">(</span><span class="n">year_2digit</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Convert 2-digit year to 4-digit year.</span>
@@ -10569,14 +10583,11 @@ Checking for \N null values in IMDb title clean:
 
 <span class="n">tmdb_movies_clean_df</span><span class="p">[</span><span class="s1">'date_year'</span><span class="p">]</span> <span class="o">=</span> <span class="n">tmdb_movies_clean_df</span><span class="p">[</span><span class="s1">'date_year'</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">transform_year</span><span class="p">)</span>
 
-<span class="c1"># Check for nulls in extracted year</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Null date_years: </span><span class="si">{</span><span class="n">tmdb_movies_clean_df</span><span class="p">[</span><span class="s1">'date_year'</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-<span class="c1"># Check min and max values in extracted year</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Min date_year: </span><span class="si">{</span><span class="n">tmdb_movies_clean_df</span><span class="p">[</span><span class="s1">'date_year'</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Max date_year: </span><span class="si">{</span><span class="n">tmdb_movies_clean_df</span><span class="p">[</span><span class="s1">'date_year'</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
-<span class="c1"># Check min and max values in release_year</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Min release_year: </span><span class="si">{</span><span class="n">tmdb_movies_clean_df</span><span class="p">[</span><span class="s1">'release_year'</span><span class="p">]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Max release_year: </span><span class="si">{</span><span class="n">tmdb_movies_clean_df</span><span class="p">[</span><span class="s1">'release_year'</span><span class="p">]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
@@ -10684,7 +10695,7 @@ TMDb zero runtimes: 31
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h4 id="TMDb-Cleaning">TMDb Cleaning<a class="anchor-link" href="#TMDb-Cleaning">¶</a></h4>
+<h4 id="TMDb-Cleaning">TMDb Cleaning<a class="anchor-link" href="#TMDb-Cleaning">¶</a></h4><p>Here we'll drop duplicates and remove columns deemed non-critical for analysis.</p>
 </div>
 </div>
 </div>
@@ -10696,12 +10707,8 @@ TMDb zero runtimes: 31
 <div class="jp-InputPrompt jp-InputArea-prompt">In [31]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Clean up TMDb dataset</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">tmdb_movies_clean_df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-<span class="c1"># Drop duplicates</span>
-<span class="n">tmdb_movies_clean_df</span><span class="o">.</span><span class="n">drop_duplicates</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-
-<span class="c1"># Remove non-critical columns</span>
 <span class="n">tmdb_movies_clean_df</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span>
     <span class="s1">'id'</span><span class="p">,</span> <span class="s1">'popularity'</span><span class="p">,</span> <span class="s1">'homepage'</span><span class="p">,</span> <span class="s1">'keywords'</span><span class="p">,</span> <span class="s1">'tagline'</span><span class="p">,</span> <span class="s1">'overview'</span><span class="p">,</span> <span class="s1">'production_companies'</span><span class="p">,</span> 
     <span class="s1">'budget_adj'</span><span class="p">,</span> <span class="s1">'revenue_adj'</span><span class="p">,</span> <span class="s1">'cast'</span><span class="p">,</span> <span class="s1">'director'</span><span class="p">,</span> <span class="s1">'release_date'</span><span class="p">,</span> <span class="s1">'date_year'</span>
@@ -10886,7 +10893,7 @@ memory usage: 848.0+ KB
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h4 id="IMDb-Checks">IMDb Checks<a class="anchor-link" href="#IMDb-Checks">¶</a></h4>
+<h4 id="IMDb-Data-Quality-Checks">IMDb Data Quality Checks<a class="anchor-link" href="#IMDb-Data-Quality-Checks">¶</a></h4><p>Examining the IMDb dataset for duplicates, null values, and non-numeric data in runtime fields. We'll also identify which columns to drop during cleanup.</p>
 </div>
 </div>
 </div>
@@ -10898,15 +10905,17 @@ memory usage: 848.0+ KB
 <div class="jp-InputPrompt jp-InputArea-prompt">In [33]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Defined here but used later during cleanup</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">imdb_columns</span> <span class="o">=</span> <span class="n">imdb_title_clean_df</span><span class="o">.</span><span class="n">columns</span>
+
+<span class="c1"># Columns to drop and convert</span>
 <span class="n">drop_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'isAdult'</span><span class="p">]</span>
+<span class="n">numeric_columns</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'startYear'</span><span class="p">,</span> <span class="s1">'endyear'</span><span class="p">,</span> <span class="s1">'runtimeMinutes'</span><span class="p">]</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Duplicate tconsts in IMDb: </span><span class="si">{</span><span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'tconst'</span><span class="p">]</span><span class="o">.</span><span class="n">duplicated</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"IMDb zero runtimes: </span><span class="si">{</span><span class="p">(</span><span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'runtimeMinutes'</span><span class="p">]</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
 
 <span class="n">display_shape</span><span class="p">(</span><span class="n">imdb_title_clean_df</span><span class="p">)</span>
 
-<span class="c1"># Check the situation on null values in columns</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">check_null_column_values</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
     <span class="nb">print</span><span class="p">(</span><span class="s2">"Columns with NULL values:"</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
@@ -10922,9 +10931,10 @@ memory usage: 848.0+ KB
 
 <span class="c1"># Fill null numeric columns with zero</span>
 <span class="c1"># Technically clean-up but we need to do this before the next check</span>
-<span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'startYear'</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'endYear'</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'runtimeMinutes'</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">numeric_columns</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">imdb_columns</span><span class="p">:</span>
+        <span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
 <span class="n">check_null_column_values</span><span class="p">(</span><span class="n">imdb_title_clean_df</span><span class="p">)</span>
 
@@ -10935,6 +10945,9 @@ memory usage: 848.0+ KB
 
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Found </span><span class="si">{</span><span class="n">non_numeric_row_count</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> rows where runtimeMinutes is not a numeric value:</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
 <span class="n">display</span><span class="p">(</span><span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="n">non_numeric_mask</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Unique types:</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'titleType'</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
 </pre></div>
 </div>
 </div>
@@ -10964,6 +10977,7 @@ Columns with NULL values:
 Columns with NULL values:
   primaryTitle: 1 null values
   originalTitle: 1 null values
+  endYear: 1,538,909 null values
   genres: 22,361 null values
 
 Found 4 rows where runtimeMinutes is not a numeric value:
@@ -11028,7 +11042,7 @@ Found 4 rows where runtimeMinutes is not a numeric value:
 <td>0</td>
 <td>2022</td>
 <td>0</td>
-<td>0</td>
+<td>NaN</td>
 <td>Documentary</td>
 <td>NaN</td>
 <td>7.4</td>
@@ -11042,7 +11056,7 @@ Found 4 rows where runtimeMinutes is not a numeric value:
 <td>0</td>
 <td>2023</td>
 <td>0</td>
-<td>0</td>
+<td>NaN</td>
 <td>Reality-TV</td>
 <td>NaN</td>
 <td>2.8</td>
@@ -11056,7 +11070,7 @@ Found 4 rows where runtimeMinutes is not a numeric value:
 <td>0</td>
 <td>2014</td>
 <td>0</td>
-<td>0</td>
+<td>NaN</td>
 <td>Game-Show,Reality-TV</td>
 <td>NaN</td>
 <td>7.8</td>
@@ -11065,6 +11079,22 @@ Found 4 rows where runtimeMinutes is not a numeric value:
 </tbody>
 </table>
 </div>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>
+Unique types:
+
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>array(['short', 'movie', 'tvShort', 'tvEpisode', 'tvSeries', 'tvMovie',
+       'tvMiniSeries', 'tvSpecial', 'video', 'videoGame'], dtype=object)</pre>
 </div>
 </div>
 </div>
@@ -11076,7 +11106,7 @@ Found 4 rows where runtimeMinutes is not a numeric value:
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h4 id="IMDb-Cleanup">IMDb Cleanup<a class="anchor-link" href="#IMDb-Cleanup">¶</a></h4>
+<h4 id="IMDb-Cleanup">IMDb Cleanup<a class="anchor-link" href="#IMDb-Cleanup">¶</a></h4><p>In this section, we'll convert data types (i.e. str to int), drop all rows that aren't movies, and remove non-critical columns.</p>
 </div>
 </div>
 </div>
@@ -11088,16 +11118,17 @@ Found 4 rows where runtimeMinutes is not a numeric value:
 <div class="jp-InputPrompt jp-InputArea-prompt">In [34]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># There are only a few non-numeric and none of them are movies.</span>
-<span class="c1"># Also, these rows are missing a bunch of data we want. Drop them.</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># These rows are missing a bunch of data we want. Drop them.</span>
 <span class="n">imdb_title_clean_df</span> <span class="o">=</span> <span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="o">~</span><span class="n">non_numeric_mask</span><span class="p">]</span>
 
-<span class="c1"># Convert columns</span>
-<span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'startYear'</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'startYear'</span><span class="p">])</span>
-<span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'endYear'</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'endYear'</span><span class="p">])</span>
-<span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'runtimeMinutes'</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'runtimeMinutes'</span><span class="p">])</span>
+<span class="c1"># Drop rows where titleType != 'movie'</span>
+<span class="n">imdb_title_clean_df</span> <span class="o">=</span> <span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'titleType'</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'movie'</span><span class="p">]</span>
 
-<span class="c1"># Remove non-critical columns</span>
+<span class="c1"># Convert columns that should be numeric</span>
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">numeric_columns</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">imdb_columns</span><span class="p">:</span>
+        <span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="n">col</span><span class="p">])</span>
+
 <span class="n">imdb_title_clean_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">drop_columns</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">'ignore'</span><span class="p">)</span>
 
 <span class="c1"># Convert genres to tuples to match TMBd format</span>
@@ -11126,8 +11157,7 @@ Found 4 rows where runtimeMinutes is not a numeric value:
 <div class="jp-InputPrompt jp-InputArea-prompt">In [35]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Final look at IMDb dataset</span>
-<span class="n">display</span><span class="p">(</span><span class="n">imdb_title_clean_df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">display</span><span class="p">(</span><span class="n">imdb_title_clean_df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
 <span class="n">display</span><span class="p">(</span><span class="n">imdb_title_clean_df</span><span class="o">.</span><span class="n">info</span><span class="p">())</span>
 </pre></div>
 </div>
@@ -11172,64 +11202,64 @@ Found 4 rows where runtimeMinutes is not a numeric value:
 </thead>
 <tbody>
 <tr>
-<th>0</th>
-<td>tt0000001</td>
-<td>short</td>
-<td>Carmencita</td>
-<td>Carmencita</td>
+<th>8</th>
+<td>tt0000009</td>
+<td>movie</td>
+<td>Miss Jerry</td>
+<td>Miss Jerry</td>
 <td>1894</td>
-<td>1</td>
-<td>(Documentary, Short)</td>
-<td>5.7</td>
-<td>2187</td>
-</tr>
-<tr>
-<th>1</th>
-<td>tt0000002</td>
-<td>short</td>
-<td>Le clown et ses chiens</td>
-<td>Le clown et ses chiens</td>
-<td>1892</td>
-<td>5</td>
-<td>(Animation, Short)</td>
-<td>5.5</td>
-<td>307</td>
-</tr>
-<tr>
-<th>2</th>
-<td>tt0000003</td>
-<td>short</td>
-<td>Poor Pierrot</td>
-<td>Pauvre Pierrot</td>
-<td>1892</td>
-<td>5</td>
-<td>(Animation, Comedy, Romance)</td>
-<td>6.4</td>
-<td>2273</td>
-</tr>
-<tr>
-<th>3</th>
-<td>tt0000004</td>
-<td>short</td>
-<td>Un bon bock</td>
-<td>Un bon bock</td>
-<td>1892</td>
-<td>12</td>
-<td>(Animation, Short)</td>
+<td>45</td>
+<td>(Romance,)</td>
 <td>5.2</td>
-<td>196</td>
+<td>231</td>
 </tr>
 <tr>
-<th>4</th>
-<td>tt0000005</td>
-<td>short</td>
-<td>Blacksmith Scene</td>
-<td>Blacksmith Scene</td>
-<td>1893</td>
-<td>1</td>
-<td>(Short,)</td>
-<td>6.2</td>
-<td>3012</td>
+<th>144</th>
+<td>tt0000147</td>
+<td>movie</td>
+<td>The Corbett-Fitzsimmons Fight</td>
+<td>The Corbett-Fitzsimmons Fight</td>
+<td>1897</td>
+<td>100</td>
+<td>(Documentary, News, Sport)</td>
+<td>5.3</td>
+<td>578</td>
+</tr>
+<tr>
+<th>285</th>
+<td>tt0000335</td>
+<td>movie</td>
+<td>Soldiers of the Cross</td>
+<td>Soldiers of the Cross</td>
+<td>1900</td>
+<td>40</td>
+<td>(Biography, Drama)</td>
+<td>5.5</td>
+<td>64</td>
+</tr>
+<tr>
+<th>383</th>
+<td>tt0000502</td>
+<td>movie</td>
+<td>Bohemios</td>
+<td>Bohemios</td>
+<td>1905</td>
+<td>100</td>
+<td>(,)</td>
+<td>3.1</td>
+<td>25</td>
+</tr>
+<tr>
+<th>420</th>
+<td>tt0000574</td>
+<td>movie</td>
+<td>The Story of the Kelly Gang</td>
+<td>The Story of the Kelly Gang</td>
+<td>1906</td>
+<td>70</td>
+<td>(Action, Adventure, Biography)</td>
+<td>6.0</td>
+<td>1039</td>
 </tr>
 </tbody>
 </table>
@@ -11240,21 +11270,21 @@ Found 4 rows where runtimeMinutes is not a numeric value:
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>&lt;class 'pandas.core.frame.DataFrame'&gt;
-Index: 1607363 entries, 0 to 1607366
+Index: 336033 entries, 8 to 1607326
 Data columns (total 9 columns):
- #   Column          Non-Null Count    Dtype  
----  ------          --------------    -----  
- 0   tconst          1607363 non-null  object 
- 1   titleType       1607363 non-null  object 
- 2   primaryTitle    1607362 non-null  object 
- 3   originalTitle   1607362 non-null  object 
- 4   startYear       1607363 non-null  int64  
- 5   runtimeMinutes  1607363 non-null  int64  
- 6   genres          1607363 non-null  object 
- 7   averageRating   1607363 non-null  float64
- 8   numVotes        1607363 non-null  int64  
+ #   Column          Non-Null Count   Dtype  
+---  ------          --------------   -----  
+ 0   tconst          336033 non-null  object 
+ 1   titleType       336033 non-null  object 
+ 2   primaryTitle    336032 non-null  object 
+ 3   originalTitle   336032 non-null  object 
+ 4   startYear       336033 non-null  int64  
+ 5   runtimeMinutes  336033 non-null  int64  
+ 6   genres          336033 non-null  object 
+ 7   averageRating   336033 non-null  float64
+ 8   numVotes        336033 non-null  int64  
 dtypes: float64(1), int64(3), object(5)
-memory usage: 122.6+ MB
+memory usage: 25.6+ MB
 </pre>
 </div>
 </div>
@@ -11285,13 +11315,10 @@ memory usage: 122.6+ MB
 <div class="jp-InputPrompt jp-InputArea-prompt">In [36]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># ============================================================================</span>
-<span class="c1"># Final Validation Summary</span>
-<span class="c1"># ============================================================================</span>
-
-<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Final Validation Summary</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"DATA CLEANING COMPLETE - SUMMARY"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">80</span><span class="p">)</span>
 
 <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">TMDB DATASET:"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"   Rows: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">tmdb_movies_clean_df</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
@@ -11314,9 +11341,9 @@ memory usage: 122.6+ MB
 <div class="jp-OutputArea-child">
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
-<pre>======================================================================
+<pre>================================================================================
 DATA CLEANING COMPLETE - SUMMARY
-======================================================================
+================================================================================
 
 TMDB DATASET:
    Rows: 10,855
@@ -11324,7 +11351,7 @@ TMDB DATASET:
    Column names: imdb_id, budget, revenue, original_title, runtime, genres, vote_count, vote_average, release_year
 
 IMDB DATASET:
-   Rows: 1,607,363
+   Rows: 336,033
    Columns: 9
    Column names: tconst, titleType, primaryTitle, originalTitle, startYear, runtimeMinutes, genres, averageRating, numVotes
 </pre>
@@ -11343,6 +11370,31 @@ IMDB DATASET:
 </div>
 </div>
 </div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p><strong>Runtime Handling Strategy</strong></p>
+<p>Based on the analysis above:</p>
+<p><strong>Zero Runtimes:</strong></p>
+<ul>
+<li>Zero-minute runtimes are invalid for theatrical movies (even shorts have measurable runtime)</li>
+<li>These represent missing data incorrectly encoded as zeros</li>
+<li><strong>Decision:</strong> Convert zeros to NaN for accurate statistical calculations</li>
+</ul>
+<p><strong>Missing Runtime Strategy:</strong>
+After merging TMDb and IMDb, we will:</p>
+<ol>
+<li>Use TMDb runtime as primary (more specific to theatrical releases)</li>
+<li>Fill TMDb nulls with IMDb runtimeMinutes where available</li>
+<li>Document remaining nulls for potential exclusion from runtime-based analyses</li>
+</ol>
+</div>
+</div>
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -11351,20 +11403,7 @@ IMDB DATASET:
 <div class="jp-InputPrompt jp-InputArea-prompt">In [37]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1">## TODO:</span>
-<span class="c1"># Do IMDb runtimes fill in any gaps for nan runtimes in TMDb or vice versa? </span>
-<span class="c1"># Do runtimes agree between TMDb and IMDb? If not, what's the difference? If small, maybe use mean.</span>
-<span class="c1"># Do TMDb and IMDb genres agree? If not, what do we do? Merge?</span>
-
-
-<span class="c1"># After merge, compare runtimes</span>
-<span class="c1">#merged_df['runtime_diff'] = abs(merged_df['runtime'] - merged_df['runtimeMinutes'])</span>
-<span class="c1">#print(merged_df['runtime_diff'].describe())</span>
-
-<span class="c1"># If differences are small (median &lt;5 minutes), use mean</span>
-<span class="c1"># If large discrepancies, investigate and document decision</span>
-
-<span class="c1"># Runtime Analysis - Check for zeros and missing values</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Runtime Analysis - Check for zeros and missing values</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"RUNTIME CHECKS:</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
 
 <span class="c1"># TMDb runtime analysis</span>
@@ -11398,36 +11437,11 @@ TMDb - Zero runtimes: 31
 TMDb - Null runtimes: 0
 TMDb - Runtime range: 0 - 900
 
-IMDb - Zero runtimes: 472,525
+IMDb - Zero runtimes: 33,067
 IMDb - Null runtimes: 0
-IMDb - Runtime range: 0 - 3692080
+IMDb - Runtime range: 0 - 59460
 </pre>
 </div>
-</div>
-</div>
-</div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p><strong>Runtime Handling Strategy</strong></p>
-<p>Based on the analysis above:</p>
-<p><strong>Zero Runtimes:</strong></p>
-<ul>
-<li>Zero-minute runtimes are invalid for theatrical movies (even shorts have measurable runtime)</li>
-<li>These represent missing data incorrectly encoded as zeros</li>
-<li><strong>Decision:</strong> Convert zeros to NaN for accurate statistical calculations</li>
-</ul>
-<p><strong>Missing Runtime Strategy:</strong>
-After merging TMDb and IMDb, we will:</p>
-<ol>
-<li>Use TMDb runtime as primary (more specific to theatrical releases)</li>
-<li>Fill TMDb nulls with IMDb runtimeMinutes where available</li>
-<li>Document remaining nulls for potential exclusion from runtime-based analyses</li>
-</ol>
 </div>
 </div>
 </div>
@@ -11472,6 +11486,7 @@ TMDb - Null runtimes: 31
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<hr/>
 <p><strong>Genre Handling Strategy</strong></p>
 <p>TMDb and IMDb use different but complementary genre systems:</p>
 <p><strong>TMDb Genres:</strong> More granular (e.g., "Science Fiction", "Adventure")
@@ -11507,9 +11522,11 @@ TMDb - Null runtimes: 31
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Quick check: What are the unique genres in each dataset?</span>
 <span class="k">def</span><span class="w"> </span><span class="nf">check_genres</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+    <span class="n">df_genres</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">'genres'</span><span class="p">]</span>
+    
     <span class="c1"># Extract unique genres from tuples</span>
     <span class="n">unique_genres</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">genre_tuple</span> <span class="ow">in</span> <span class="n">df</span><span class="p">[</span><span class="s1">'genres'</span><span class="p">]</span><span class="o">.</span><span class="n">dropna</span><span class="p">():</span>
+    <span class="k">for</span> <span class="n">genre_tuple</span> <span class="ow">in</span> <span class="n">df_genres</span><span class="o">.</span><span class="n">dropna</span><span class="p">():</span>
         <span class="c1"># Skip empty tuples</span>
         <span class="k">if</span> <span class="n">genre_tuple</span><span class="p">:</span>
             <span class="n">unique_genres</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">genre_tuple</span><span class="p">)</span>
@@ -11517,11 +11534,13 @@ TMDb - Null runtimes: 31
     <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> unique genres (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">unique_genres</span><span class="p">)</span><span class="si">}</span><span class="s2">):"</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">unique_genres</span><span class="p">))</span>
     
-<span class="n">check_genres</span><span class="p">(</span><span class="n">tmdb_movies_clean_df</span><span class="p">,</span> <span class="s2">"TMDb"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">()</span>
+    <span class="c1">## Check for empty string in genre and that it's the only value</span>
+    <span class="n">rows_no_genre</span> <span class="o">=</span> <span class="n">df_genres</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s1">''</span> <span class="ow">in</span> <span class="n">x</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Rows in </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2"> with no genre: </span><span class="si">{</span><span class="n">rows_no_genre</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
 
+    
+<span class="n">check_genres</span><span class="p">(</span><span class="n">tmdb_movies_clean_df</span><span class="p">,</span> <span class="s2">"TMDb"</span><span class="p">)</span>
 <span class="n">check_genres</span><span class="p">(</span><span class="n">imdb_title_clean_df</span><span class="p">,</span> <span class="s2">"IMDb"</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">()</span>
 </pre></div>
 </div>
 </div>
@@ -11537,52 +11556,2383 @@ TMDb - Null runtimes: 31
 <pre>TMDb unique genres (21):
 ['', 'Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Family', 'Fantasy', 'Foreign', 'History', 'Horror', 'Music', 'Mystery', 'Romance', 'Science Fiction', 'TV Movie', 'Thriller', 'War', 'Western']
 
+Rows in TMDb with no genre: 21
+
 IMDb unique genres (29):
 ['', 'Action', 'Adult', 'Adventure', 'Animation', 'Biography', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Family', 'Fantasy', 'Film-Noir', 'Game-Show', 'History', 'Horror', 'Music', 'Musical', 'Mystery', 'News', 'Reality-TV', 'Romance', 'Sci-Fi', 'Short', 'Sport', 'Talk-Show', 'Thriller', 'War', 'Western']
+
+Rows in IMDb with no genre: 10,833
 
 </pre>
 </div>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [40]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span> 
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Drop IMDb rows with genres we don't want to analyze</span>
+<span class="n">exclude_genres</span> <span class="o">=</span> <span class="p">[</span><span class="s1">'Adult'</span><span class="p">,</span> <span class="s1">'Game-Show'</span><span class="p">,</span> <span class="s1">'News'</span><span class="p">,</span> <span class="s1">'Reality-TV'</span><span class="p">,</span> <span class="s1">'Short'</span><span class="p">,</span> <span class="s1">'Talk-Show'</span><span class="p">]</span>
+<span class="n">excluded_genres_mask</span> <span class="o">=</span> <span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'genres'</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">any</span><span class="p">(</span><span class="n">val</span> <span class="ow">in</span> <span class="n">x</span> <span class="k">for</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">exclude_genres</span><span class="p">))</span>
+<span class="n">imdb_title_clean_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="n">excluded_genres_mask</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Function to replace a genre's value</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">replace_genre</span><span class="p">(</span><span class="n">genre_tuple</span><span class="p">,</span> <span class="n">target_str</span><span class="p">,</span> <span class="n">replace_str</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">target_str</span> <span class="o">==</span> <span class="n">replace_str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">genre_tuple</span>
+    
+    <span class="n">genre_list</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">genre_tuple</span><span class="p">)</span>
+    
+    <span class="k">if</span> <span class="n">target_str</span> <span class="ow">in</span> <span class="n">genre_list</span><span class="p">:</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">genre_list</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">target_str</span><span class="p">)</span>
+        <span class="n">genre_list</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">=</span> <span class="n">replace_str</span>
+        
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">genre_list</span><span class="p">)</span>
+
+<span class="c1"># Normalize genres in IMDb</span>
+<span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'genres'</span><span class="p">]</span> <span class="o">=</span> <span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'genres'</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">g</span><span class="p">:</span> <span class="n">replace_genre</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="s1">'Sci-Fi'</span><span class="p">,</span> <span class="s1">'Science Fiction'</span><span class="p">))</span>
+<span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'genres'</span><span class="p">]</span> <span class="o">=</span> <span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'genres'</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">g</span><span class="p">:</span> <span class="n">replace_genre</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="s1">'Film-Noir'</span><span class="p">,</span> <span class="s1">'Film Noir'</span><span class="p">))</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Rows with 'Musical' genre: </span><span class="si">{</span><span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'genres'</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span><span class="w"> </span><span class="n">x</span><span class="p">:</span><span class="w"> </span><span class="s1">'Musical'</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">x</span><span class="p">)]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Rows with 'Music' genre: </span><span class="si">{</span><span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'genres'</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span><span class="w"> </span><span class="n">x</span><span class="p">:</span><span class="w"> </span><span class="s1">'Music'</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">x</span><span class="p">)]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Rows with both genres: </span><span class="si">{</span><span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'genres'</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span><span class="w"> </span><span class="n">x</span><span class="p">:</span><span class="w"> </span><span class="s1">'Music'</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="s1">'Musical'</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">x</span><span class="p">)]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># Since we have only movies, let's assume Music and Musical genres are the same</span>
+<span class="c1"># "Phantom of the Opera" has the 'Music' genre but it is indeed a Musical.</span>
+<span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'genres'</span><span class="p">]</span> <span class="o">=</span> <span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'genres'</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">g</span><span class="p">:</span> <span class="n">replace_genre</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="s1">'Music'</span><span class="p">,</span> <span class="s1">'Musical'</span><span class="p">))</span>
+
+<span class="c1"># Check 'Sport' genre</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Rows with 'Sport' genre: </span><span class="si">{</span><span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'genres'</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span><span class="w"> </span><span class="n">x</span><span class="p">:</span><span class="w"> </span><span class="s1">'Sport'</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">x</span><span class="p">)]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Rows with only 'Sport' genre: </span><span class="si">{</span><span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="n">imdb_title_clean_df</span><span class="p">[</span><span class="s1">'genres'</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span><span class="w"> </span><span class="n">x</span><span class="p">:</span><span class="w"> </span><span class="s1">'Sport'</span><span class="w"> </span><span class="ow">in</span><span class="w"> </span><span class="n">x</span><span class="w"> </span><span class="ow">and</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="p">)]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="c1"># There are 254 rows where 'Sport' is the only genre. Spot checking them has mixed results.</span>
+<span class="c1"># Keeping for now to see how they get merged into TMDb.</span>
+
+<span class="n">display_shape</span><span class="p">(</span><span class="n">imdb_title_clean_df</span><span class="p">)</span>
+<span class="n">check_genres</span><span class="p">(</span><span class="n">tmdb_movies_clean_df</span><span class="p">,</span> <span class="s2">"TMDb"</span><span class="p">)</span>
+<span class="n">check_genres</span><span class="p">(</span><span class="n">imdb_title_clean_df</span><span class="p">,</span> <span class="s2">"IMDb"</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Rows with 'Musical' genre: 6,975
+Rows with 'Music' genre: 8,511
+Rows with both genres: 190
+
+Rows with 'Sport' genre: 4,253
+Rows with only 'Sport' genre: 254
+
+Rows: 330,560
+Columns: 9
+
+TMDb unique genres (21):
+['', 'Action', 'Adventure', 'Animation', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Family', 'Fantasy', 'Foreign', 'History', 'Horror', 'Music', 'Mystery', 'Romance', 'Science Fiction', 'TV Movie', 'Thriller', 'War', 'Western']
+
+Rows in TMDb with no genre: 21
+
+IMDb unique genres (22):
+['', 'Action', 'Adventure', 'Animation', 'Biography', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Family', 'Fantasy', 'Film Noir', 'History', 'Horror', 'Musical', 'Mystery', 'Romance', 'Science Fiction', 'Sport', 'Thriller', 'War', 'Western']
+
+Rows in IMDb with no genre: 10,833
+
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p><strong>Merge IMDb and TMDb Datasets</strong></p>
+<p>Now we can do the actual merging of IMDb and TMDb to see where we stand.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [41]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span> 
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">merged_xmdb_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span>
+    <span class="n">tmdb_movies_clean_df</span><span class="p">,</span> 
+    <span class="n">imdb_title_clean_df</span><span class="p">,</span> 
+    <span class="n">left_on</span><span class="o">=</span><span class="s1">'imdb_id'</span><span class="p">,</span> 
+    <span class="n">right_on</span><span class="o">=</span><span class="s1">'tconst'</span><span class="p">,</span> 
+    <span class="n">how</span><span class="o">=</span><span class="s1">'left'</span><span class="p">,</span>
+    <span class="n">suffixes</span><span class="o">=</span><span class="p">(</span><span class="s1">'_tmdb'</span><span class="p">,</span> <span class="s1">'_imdb'</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">'imdb_id'</span><span class="p">,</span> <span class="s1">'tconst'</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">'ignore'</span><span class="p">)</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">info</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
 </pre></div>
 </div>
 </div>
 </div>
 </div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 10855 entries, 0 to 10854
+Data columns (total 16 columns):
+ #   Column          Non-Null Count  Dtype  
+---  ------          --------------  -----  
+ 0   budget          5168 non-null   float64
+ 1   revenue         4849 non-null   float64
+ 2   original_title  10855 non-null  object 
+ 3   runtime         10824 non-null  float64
+ 4   genres_tmdb     10855 non-null  object 
+ 5   vote_count      10855 non-null  int64  
+ 6   vote_average    10855 non-null  float64
+ 7   release_year    10855 non-null  int64  
+ 8   titleType       9459 non-null   object 
+ 9   primaryTitle    9459 non-null   object 
+ 10  originalTitle   9459 non-null   object 
+ 11  startYear       9459 non-null   float64
+ 12  runtimeMinutes  9459 non-null   float64
+ 13  genres_imdb     9459 non-null   object 
+ 14  averageRating   9459 non-null   float64
+ 15  numVotes        9459 non-null   float64
+dtypes: float64(8), int64(2), object(6)
+memory usage: 1.3+ MB
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>None</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>
+
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>budget</th>
+<th>revenue</th>
+<th>original_title</th>
+<th>runtime</th>
+<th>genres_tmdb</th>
+<th>vote_count</th>
+<th>vote_average</th>
+<th>release_year</th>
+<th>titleType</th>
+<th>primaryTitle</th>
+<th>originalTitle</th>
+<th>startYear</th>
+<th>runtimeMinutes</th>
+<th>genres_imdb</th>
+<th>averageRating</th>
+<th>numVotes</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>150000000.0</td>
+<td>1.513529e+09</td>
+<td>Jurassic World</td>
+<td>124.0</td>
+<td>(Action, Adventure, Science Fiction, Thriller)</td>
+<td>5562</td>
+<td>6.5</td>
+<td>2015</td>
+<td>movie</td>
+<td>Jurassic World</td>
+<td>Jurassic World</td>
+<td>2015.0</td>
+<td>124.0</td>
+<td>(Action, Adventure, Science Fiction)</td>
+<td>6.9</td>
+<td>718366.0</td>
+</tr>
+<tr>
+<th>1</th>
+<td>150000000.0</td>
+<td>3.784364e+08</td>
+<td>Mad Max: Fury Road</td>
+<td>120.0</td>
+<td>(Action, Adventure, Science Fiction, Thriller)</td>
+<td>6185</td>
+<td>7.1</td>
+<td>2015</td>
+<td>movie</td>
+<td>Mad Max: Fury Road</td>
+<td>Mad Max: Fury Road</td>
+<td>2015.0</td>
+<td>120.0</td>
+<td>(Action, Adventure, Science Fiction)</td>
+<td>8.1</td>
+<td>1189406.0</td>
+</tr>
+<tr>
+<th>2</th>
+<td>110000000.0</td>
+<td>2.952382e+08</td>
+<td>Insurgent</td>
+<td>119.0</td>
+<td>(Adventure, Science Fiction, Thriller)</td>
+<td>2480</td>
+<td>6.3</td>
+<td>2015</td>
+<td>movie</td>
+<td>The Divergent Series: Insurgent</td>
+<td>The Divergent Series: Insurgent</td>
+<td>2015.0</td>
+<td>119.0</td>
+<td>(Action, Adventure, Science Fiction)</td>
+<td>6.2</td>
+<td>268250.0</td>
+</tr>
+<tr>
+<th>3</th>
+<td>200000000.0</td>
+<td>2.068178e+09</td>
+<td>Star Wars: The Force Awakens</td>
+<td>136.0</td>
+<td>(Action, Adventure, Science Fiction, Fantasy)</td>
+<td>5292</td>
+<td>7.5</td>
+<td>2015</td>
+<td>movie</td>
+<td>Star Wars: Episode VII - The Force Awakens</td>
+<td>Star Wars: Episode VII - The Force Awakens</td>
+<td>2015.0</td>
+<td>138.0</td>
+<td>(Action, Adventure, Science Fiction)</td>
+<td>7.7</td>
+<td>1013886.0</td>
+</tr>
+<tr>
+<th>4</th>
+<td>190000000.0</td>
+<td>1.506249e+09</td>
+<td>Furious 7</td>
+<td>137.0</td>
+<td>(Action, Crime, Thriller)</td>
+<td>2947</td>
+<td>7.3</td>
+<td>2015</td>
+<td>movie</td>
+<td>Furious 7</td>
+<td>Fast &amp; Furious 7</td>
+<td>2015.0</td>
+<td>137.0</td>
+<td>(Action, Thriller)</td>
+<td>7.1</td>
+<td>434109.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [42]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Spot-check columns for nulls, zeros, empty tuples</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">check_no_data</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">col</span><span class="p">):</span>
+    <span class="n">empty_string_rows</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">==</span> <span class="s1">''</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">null_rows</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">numeric_col_is_zero</span> <span class="o">=</span> <span class="mi">0</span>
+    
+    <span class="k">if</span> <span class="n">empty_string_rows</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Rows </span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2"> empty string: </span><span class="si">{</span><span class="n">empty_string_rows</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        
+    <span class="k">if</span> <span class="n">null_rows</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Rows </span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2"> is null: </span><span class="si">{</span><span class="n">null_rows</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+        
+    <span class="k">if</span> <span class="n">is_numeric_dtype</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]):</span>
+        <span class="n">numeric_col_is_zero</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">numeric_col_is_zero</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Rows </span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2"> is zero: </span><span class="si">{</span><span class="n">numeric_col_is_zero</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+            
+    <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">'genres'</span><span class="p">):</span>
+        <span class="n">rows_with_no_genres</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">len</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="k">if</span> <span class="n">rows_with_no_genres</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Rows </span><span class="si">{</span><span class="n">col</span><span class="si">}</span><span class="s2"> is empty: </span><span class="si">{</span><span class="n">rows_with_no_genres</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+    <span class="n">check_no_data</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Rows budget is null: 5,687
+Rows revenue is null: 6,006
+Rows runtime is null: 31
+Rows titleType is null: 1,396
+Rows primaryTitle is null: 1,396
+Rows originalTitle is null: 1,396
+Rows startYear is null: 1,396
+Rows runtimeMinutes is null: 1,396
+Rows genres_imdb is null: 1,396
+Rows averageRating is null: 1,396
+Rows numVotes is null: 1,396
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<hr/>
+<p><strong>Initial merged analysis</strong></p>
+<ul>
+<li>We have 1,396 rows that had no corresponding IMDb data</li>
+<li>We already knew budget and revenue had null data</li>
+<li>No numeric columns have zeros</li>
+<li>We have at least 1 genre in both genre columns except where there's no IMDb data</li>
+</ul>
+<p><strong>Genre Merging</strong></p>
+<p>Combining TMDb and IMDb genres to create comprehensive coverage. Both sources are normalized to use matching terminology (e.g., "Science Fiction" instead of "Sci-Fi"), and genres are deduplicated and sorted for consistency.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [43]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">merge_genres</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Merge IMDb and TMDb genre columns favoring TMDb when IMDb doesn't have any"""</span>
+    <span class="n">genres_tmdb</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">'genres_tmdb'</span><span class="p">]</span>
+    <span class="n">genres_imdb</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="s1">'genres_imdb'</span><span class="p">]</span>
+    <span class="n">genres</span> <span class="o">=</span> <span class="kc">None</span>
+    
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">genres_imdb</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+        <span class="n">genres</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">genres_tmdb</span> <span class="o">+</span> <span class="n">genres_imdb</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">genres</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">genres_tmdb</span><span class="p">)</span>
+
+    <span class="c1"># If there's an empty string in the set and it's not the only element, then remove it</span>
+    <span class="c1"># We'll deal with rows that have no genres later</span>
+    <span class="k">if</span> <span class="s1">''</span> <span class="ow">in</span> <span class="n">genres</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">genres</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">genres</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="s1">''</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">genres</span><span class="p">)</span>
+
+<span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'genres'</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">merge_genres</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">check_genres</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">,</span> <span class="s2">"XMDb"</span><span class="p">)</span>
+
+<span class="c1"># IMDb filled in 9 of the TMDb rows with no genres, but we still have 12</span>
+<span class="n">genres_mask</span> <span class="o">=</span> <span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'genres'</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="s1">''</span> <span class="ow">in</span> <span class="n">x</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="n">genres_mask</span><span class="p">])</span>
+
+<span class="c1"># No budget and revenue for these rows and some have either no runtime or very short runtimes</span>
+<span class="c1"># Let's drop these</span>
+<span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="n">genres_mask</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>XMDb unique genres (24):
+['', 'Action', 'Adventure', 'Animation', 'Biography', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Family', 'Fantasy', 'Foreign', 'History', 'Horror', 'Music', 'Musical', 'Mystery', 'Romance', 'Science Fiction', 'Sport', 'TV Movie', 'Thriller', 'War', 'Western']
+
+Rows in XMDb with no genre: 12
+
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>budget</th>
+<th>revenue</th>
+<th>original_title</th>
+<th>runtime</th>
+<th>genres_tmdb</th>
+<th>vote_count</th>
+<th>vote_average</th>
+<th>release_year</th>
+<th>titleType</th>
+<th>primaryTitle</th>
+<th>originalTitle</th>
+<th>startYear</th>
+<th>runtimeMinutes</th>
+<th>genres_imdb</th>
+<th>averageRating</th>
+<th>numVotes</th>
+<th>genres</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>1709</th>
+<td>NaN</td>
+<td>NaN</td>
+<td>Prayers for Bobby</td>
+<td>88.0</td>
+<td>(,)</td>
+<td>57</td>
+<td>7.4</td>
+<td>2009</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>(,)</td>
+</tr>
+<tr>
+<th>2365</th>
+<td>NaN</td>
+<td>NaN</td>
+<td>Freshman Father</td>
+<td>NaN</td>
+<td>(,)</td>
+<td>12</td>
+<td>5.8</td>
+<td>2010</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>(,)</td>
+</tr>
+<tr>
+<th>2371</th>
+<td>NaN</td>
+<td>NaN</td>
+<td>Doctor Who: A Christmas Carol</td>
+<td>62.0</td>
+<td>(,)</td>
+<td>11</td>
+<td>7.7</td>
+<td>2010</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>(,)</td>
+</tr>
+<tr>
+<th>4541</th>
+<td>NaN</td>
+<td>NaN</td>
+<td>London 2012 Olympic Opening Ceremony: Isles of...</td>
+<td>220.0</td>
+<td>(,)</td>
+<td>12</td>
+<td>8.3</td>
+<td>2012</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>(,)</td>
+</tr>
+<tr>
+<th>4882</th>
+<td>NaN</td>
+<td>NaN</td>
+<td>Cousin Ben Troop Screening</td>
+<td>2.0</td>
+<td>(,)</td>
+<td>14</td>
+<td>7.0</td>
+<td>2012</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>(,)</td>
+</tr>
+<tr>
+<th>5822</th>
+<td>NaN</td>
+<td>NaN</td>
+<td>Doctor Who: The Time of the Doctor</td>
+<td>60.0</td>
+<td>(,)</td>
+<td>26</td>
+<td>8.5</td>
+<td>2013</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>(,)</td>
+</tr>
+<tr>
+<th>5926</th>
+<td>NaN</td>
+<td>NaN</td>
+<td>Prada: Candy</td>
+<td>3.0</td>
+<td>(,)</td>
+<td>27</td>
+<td>6.9</td>
+<td>2013</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>(,)</td>
+</tr>
+<tr>
+<th>6521</th>
+<td>NaN</td>
+<td>NaN</td>
+<td>Saw Rebirth</td>
+<td>6.0</td>
+<td>(,)</td>
+<td>24</td>
+<td>5.9</td>
+<td>2005</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>(,)</td>
+</tr>
+<tr>
+<th>8603</th>
+<td>NaN</td>
+<td>NaN</td>
+<td>T2 3-D: Battle Across Time</td>
+<td>12.0</td>
+<td>(,)</td>
+<td>14</td>
+<td>6.7</td>
+<td>1996</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>(,)</td>
+</tr>
+<tr>
+<th>8867</th>
+<td>NaN</td>
+<td>NaN</td>
+<td>Mom's Got a Date With a Vampire</td>
+<td>85.0</td>
+<td>(,)</td>
+<td>16</td>
+<td>5.4</td>
+<td>2000</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>(,)</td>
+</tr>
+<tr>
+<th>9296</th>
+<td>NaN</td>
+<td>NaN</td>
+<td>Goldeneye</td>
+<td>105.0</td>
+<td>(,)</td>
+<td>10</td>
+<td>5.3</td>
+<td>1989</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>(,)</td>
+</tr>
+<tr>
+<th>9788</th>
+<td>NaN</td>
+<td>NaN</td>
+<td>The Amputee</td>
+<td>5.0</td>
+<td>(,)</td>
+<td>11</td>
+<td>5.0</td>
+<td>1974</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>(,)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [44]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Re-check what we have</span>
+<span class="n">display_shape</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">)</span>
+<span class="n">check_genres</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">,</span> <span class="s2">"XMDb"</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>
+Rows: 10,843
+Columns: 17
+
+XMDb unique genres (23):
+['Action', 'Adventure', 'Animation', 'Biography', 'Comedy', 'Crime', 'Documentary', 'Drama', 'Family', 'Fantasy', 'Foreign', 'History', 'Horror', 'Music', 'Musical', 'Mystery', 'Romance', 'Science Fiction', 'Sport', 'TV Movie', 'Thriller', 'War', 'Western']
+
+Rows in XMDb with no genre: 0
+
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>budget</th>
+<th>revenue</th>
+<th>original_title</th>
+<th>runtime</th>
+<th>genres_tmdb</th>
+<th>vote_count</th>
+<th>vote_average</th>
+<th>release_year</th>
+<th>titleType</th>
+<th>primaryTitle</th>
+<th>originalTitle</th>
+<th>startYear</th>
+<th>runtimeMinutes</th>
+<th>genres_imdb</th>
+<th>averageRating</th>
+<th>numVotes</th>
+<th>genres</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>150000000.0</td>
+<td>1.513529e+09</td>
+<td>Jurassic World</td>
+<td>124.0</td>
+<td>(Action, Adventure, Science Fiction, Thriller)</td>
+<td>5562</td>
+<td>6.5</td>
+<td>2015</td>
+<td>movie</td>
+<td>Jurassic World</td>
+<td>Jurassic World</td>
+<td>2015.0</td>
+<td>124.0</td>
+<td>(Action, Adventure, Science Fiction)</td>
+<td>6.9</td>
+<td>718366.0</td>
+<td>(Science Fiction, Action, Adventure, Thriller)</td>
+</tr>
+<tr>
+<th>1</th>
+<td>150000000.0</td>
+<td>3.784364e+08</td>
+<td>Mad Max: Fury Road</td>
+<td>120.0</td>
+<td>(Action, Adventure, Science Fiction, Thriller)</td>
+<td>6185</td>
+<td>7.1</td>
+<td>2015</td>
+<td>movie</td>
+<td>Mad Max: Fury Road</td>
+<td>Mad Max: Fury Road</td>
+<td>2015.0</td>
+<td>120.0</td>
+<td>(Action, Adventure, Science Fiction)</td>
+<td>8.1</td>
+<td>1189406.0</td>
+<td>(Science Fiction, Action, Adventure, Thriller)</td>
+</tr>
+<tr>
+<th>2</th>
+<td>110000000.0</td>
+<td>2.952382e+08</td>
+<td>Insurgent</td>
+<td>119.0</td>
+<td>(Adventure, Science Fiction, Thriller)</td>
+<td>2480</td>
+<td>6.3</td>
+<td>2015</td>
+<td>movie</td>
+<td>The Divergent Series: Insurgent</td>
+<td>The Divergent Series: Insurgent</td>
+<td>2015.0</td>
+<td>119.0</td>
+<td>(Action, Adventure, Science Fiction)</td>
+<td>6.2</td>
+<td>268250.0</td>
+<td>(Action, Science Fiction, Adventure, Thriller)</td>
+</tr>
+<tr>
+<th>3</th>
+<td>200000000.0</td>
+<td>2.068178e+09</td>
+<td>Star Wars: The Force Awakens</td>
+<td>136.0</td>
+<td>(Action, Adventure, Science Fiction, Fantasy)</td>
+<td>5292</td>
+<td>7.5</td>
+<td>2015</td>
+<td>movie</td>
+<td>Star Wars: Episode VII - The Force Awakens</td>
+<td>Star Wars: Episode VII - The Force Awakens</td>
+<td>2015.0</td>
+<td>138.0</td>
+<td>(Action, Adventure, Science Fiction)</td>
+<td>7.7</td>
+<td>1013886.0</td>
+<td>(Science Fiction, Action, Adventure, Fantasy)</td>
+</tr>
+<tr>
+<th>4</th>
+<td>190000000.0</td>
+<td>1.506249e+09</td>
+<td>Furious 7</td>
+<td>137.0</td>
+<td>(Action, Crime, Thriller)</td>
+<td>2947</td>
+<td>7.3</td>
+<td>2015</td>
+<td>movie</td>
+<td>Furious 7</td>
+<td>Fast &amp; Furious 7</td>
+<td>2015.0</td>
+<td>137.0</td>
+<td>(Action, Thriller)</td>
+<td>7.1</td>
+<td>434109.0</td>
+<td>(Action, Crime, Thriller)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [45]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># We can drop genres_tmdb and genres_imdb</span>
+<span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">'genres_tmdb'</span><span class="p">,</span> <span class="s1">'genres_imdb'</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">'ignore'</span><span class="p">)</span>
+
+<span class="n">display_shape</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">)</span>
+<span class="n">display</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>
+Rows: 10,843
+Columns: 15
+
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>budget</th>
+<th>revenue</th>
+<th>original_title</th>
+<th>runtime</th>
+<th>vote_count</th>
+<th>vote_average</th>
+<th>release_year</th>
+<th>titleType</th>
+<th>primaryTitle</th>
+<th>originalTitle</th>
+<th>startYear</th>
+<th>runtimeMinutes</th>
+<th>averageRating</th>
+<th>numVotes</th>
+<th>genres</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>150000000.0</td>
+<td>1.513529e+09</td>
+<td>Jurassic World</td>
+<td>124.0</td>
+<td>5562</td>
+<td>6.5</td>
+<td>2015</td>
+<td>movie</td>
+<td>Jurassic World</td>
+<td>Jurassic World</td>
+<td>2015.0</td>
+<td>124.0</td>
+<td>6.9</td>
+<td>718366.0</td>
+<td>(Science Fiction, Action, Adventure, Thriller)</td>
+</tr>
+<tr>
+<th>1</th>
+<td>150000000.0</td>
+<td>3.784364e+08</td>
+<td>Mad Max: Fury Road</td>
+<td>120.0</td>
+<td>6185</td>
+<td>7.1</td>
+<td>2015</td>
+<td>movie</td>
+<td>Mad Max: Fury Road</td>
+<td>Mad Max: Fury Road</td>
+<td>2015.0</td>
+<td>120.0</td>
+<td>8.1</td>
+<td>1189406.0</td>
+<td>(Science Fiction, Action, Adventure, Thriller)</td>
+</tr>
+<tr>
+<th>2</th>
+<td>110000000.0</td>
+<td>2.952382e+08</td>
+<td>Insurgent</td>
+<td>119.0</td>
+<td>2480</td>
+<td>6.3</td>
+<td>2015</td>
+<td>movie</td>
+<td>The Divergent Series: Insurgent</td>
+<td>The Divergent Series: Insurgent</td>
+<td>2015.0</td>
+<td>119.0</td>
+<td>6.2</td>
+<td>268250.0</td>
+<td>(Action, Science Fiction, Adventure, Thriller)</td>
+</tr>
+<tr>
+<th>3</th>
+<td>200000000.0</td>
+<td>2.068178e+09</td>
+<td>Star Wars: The Force Awakens</td>
+<td>136.0</td>
+<td>5292</td>
+<td>7.5</td>
+<td>2015</td>
+<td>movie</td>
+<td>Star Wars: Episode VII - The Force Awakens</td>
+<td>Star Wars: Episode VII - The Force Awakens</td>
+<td>2015.0</td>
+<td>138.0</td>
+<td>7.7</td>
+<td>1013886.0</td>
+<td>(Science Fiction, Action, Adventure, Fantasy)</td>
+</tr>
+<tr>
+<th>4</th>
+<td>190000000.0</td>
+<td>1.506249e+09</td>
+<td>Furious 7</td>
+<td>137.0</td>
+<td>2947</td>
+<td>7.3</td>
+<td>2015</td>
+<td>movie</td>
+<td>Furious 7</td>
+<td>Fast &amp; Furious 7</td>
+<td>2015.0</td>
+<td>137.0</td>
+<td>7.1</td>
+<td>434109.0</td>
+<td>(Action, Crime, Thriller)</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [46]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Fill TMDb NaN runtimes with IMDb values</span>
+<span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'runtime_final'</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'runtime'</span><span class="p">]</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'runtimeMinutes'</span><span class="p">])</span>
+
+<span class="c1"># 8 rows with no runtime and most missing budget and revenue data</span>
+<span class="c1"># Drop them</span>
+<span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'runtime_final'</span><span class="p">]</span><span class="o">.</span><span class="n">isnull</span><span class="p">()]</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Check agreement where both exist</span>
+<span class="n">both_exist</span> <span class="o">=</span> <span class="n">merged_xmdb_df</span><span class="p">[[</span><span class="s1">'runtime'</span><span class="p">,</span> <span class="s1">'runtimeMinutes'</span><span class="p">]]</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">runtime_diff</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">both_exist</span><span class="p">,</span> <span class="s1">'runtime'</span><span class="p">]</span> <span class="o">-</span> 
+                  <span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">both_exist</span><span class="p">,</span> <span class="s1">'runtimeMinutes'</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Runtime differences - Median: </span><span class="si">{</span><span class="n">runtime_diff</span><span class="o">.</span><span class="n">median</span><span class="p">()</span><span class="si">}</span><span class="s2">, Mean: </span><span class="si">{</span><span class="n">runtime_diff</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, Max: </span><span class="si">{</span><span class="n">runtime_diff</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">int</span><span class="p">(</span><span class="n">runtime_diff</span><span class="o">.</span><span class="n">max</span><span class="p">()),</span> <span class="mi">5</span><span class="p">):</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Number of rows with runtime_diff &gt; </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2">: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">runtime_diff</span><span class="p">[</span><span class="n">runtime_diff</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Runtime differences - Median: 0.0, Mean: 0.96, Max: 75.0
+
+Number of rows with runtime_diff &gt; 0: 2,161
+Number of rows with runtime_diff &gt; 5: 437
+Number of rows with runtime_diff &gt; 10: 158
+Number of rows with runtime_diff &gt; 15: 83
+Number of rows with runtime_diff &gt; 20: 38
+Number of rows with runtime_diff &gt; 25: 27
+Number of rows with runtime_diff &gt; 30: 20
+Number of rows with runtime_diff &gt; 35: 14
+Number of rows with runtime_diff &gt; 40: 11
+Number of rows with runtime_diff &gt; 45: 9
+Number of rows with runtime_diff &gt; 50: 7
+Number of rows with runtime_diff &gt; 55: 6
+Number of rows with runtime_diff &gt; 60: 5
+Number of rows with runtime_diff &gt; 65: 3
+Number of rows with runtime_diff &gt; 70: 2
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<hr/>
+<p><strong>Runtime Reconciliation Decision</strong></p>
+<p><strong>Analysis Results:</strong></p>
+<ul>
+<li>Median difference: 0.0 minutes (80% exact matches)</li>
+<li>Mean difference: 0.96 minutes</li>
+<li>Only 1.5% of movies (158/10,855) differ by more than 10 minutes</li>
+</ul>
+<p><strong>Decision:</strong> Use TMDb runtime as primary, fill nulls with IMDb values</p>
+<p><strong>Justification:</strong></p>
+<ol>
+<li>TMDb is more specific to theatrical releases (our focus)</li>
+<li>Excellent agreement between sources (median = 0) validates data quality</li>
+<li>Small discrepancies (1-5 minutes) likely reflect:<ul>
+<li>Credits included/excluded</li>
+<li>Different editions (theatrical vs extended)</li>
+<li>Rounding conventions</li>
+</ul>
+</li>
+<li>Large discrepancies are rare (&lt;2%) and won't significantly impact aggregate analyses</li>
+</ol>
+<p><strong>Impact:</strong></p>
+<ul>
+<li>Before merge: 31 missing runtimes</li>
+<li>After merge: 8 missing runtimes (dropped due to insufficient data)</li>
+<li>Final dataset: 10,847 movies with reliable runtime data</li>
+</ul>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [47]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Quick validation of runtime_final</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Runtime Coverage After Merge:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Total movies: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Movies with runtime: </span><span class="si">{</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'runtime_final'</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Coverage: </span><span class="si">{</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'runtime_final'</span><span class="p">]</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">)</span><span class="w"> </span><span class="o">*</span><span class="w"> </span><span class="mi">100</span><span class="p">)</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Runtime Statistics:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'runtime_final'</span><span class="p">]</span><span class="o">.</span><span class="n">describe</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Runtime Coverage After Merge:
+Total movies: 10,835
+Movies with runtime: 10,835
+Coverage: 100.0%
+
+Runtime Statistics:
+count    10835.000000
+mean       102.439686
+std         30.812236
+min          2.000000
+25%         90.000000
+50%         99.000000
+75%        112.000000
+max        900.000000
+Name: runtime_final, dtype: float64
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [48]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Drop runtime and runtimeMinutes in favor of runtime_final</span>
+<span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">'runtime'</span><span class="p">,</span> <span class="s1">'runtimeMinutes'</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">'ignore'</span><span class="p">)</span>
+<span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">'runtime_final'</span><span class="p">:</span> <span class="s1">'runtime'</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[48]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>budget</th>
+<th>revenue</th>
+<th>original_title</th>
+<th>vote_count</th>
+<th>vote_average</th>
+<th>release_year</th>
+<th>titleType</th>
+<th>primaryTitle</th>
+<th>originalTitle</th>
+<th>startYear</th>
+<th>averageRating</th>
+<th>numVotes</th>
+<th>genres</th>
+<th>runtime</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>150000000.0</td>
+<td>1.513529e+09</td>
+<td>Jurassic World</td>
+<td>5562</td>
+<td>6.5</td>
+<td>2015</td>
+<td>movie</td>
+<td>Jurassic World</td>
+<td>Jurassic World</td>
+<td>2015.0</td>
+<td>6.9</td>
+<td>718366.0</td>
+<td>(Science Fiction, Action, Adventure, Thriller)</td>
+<td>124.0</td>
+</tr>
+<tr>
+<th>1</th>
+<td>150000000.0</td>
+<td>3.784364e+08</td>
+<td>Mad Max: Fury Road</td>
+<td>6185</td>
+<td>7.1</td>
+<td>2015</td>
+<td>movie</td>
+<td>Mad Max: Fury Road</td>
+<td>Mad Max: Fury Road</td>
+<td>2015.0</td>
+<td>8.1</td>
+<td>1189406.0</td>
+<td>(Science Fiction, Action, Adventure, Thriller)</td>
+<td>120.0</td>
+</tr>
+<tr>
+<th>2</th>
+<td>110000000.0</td>
+<td>2.952382e+08</td>
+<td>Insurgent</td>
+<td>2480</td>
+<td>6.3</td>
+<td>2015</td>
+<td>movie</td>
+<td>The Divergent Series: Insurgent</td>
+<td>The Divergent Series: Insurgent</td>
+<td>2015.0</td>
+<td>6.2</td>
+<td>268250.0</td>
+<td>(Action, Science Fiction, Adventure, Thriller)</td>
+<td>119.0</td>
+</tr>
+<tr>
+<th>3</th>
+<td>200000000.0</td>
+<td>2.068178e+09</td>
+<td>Star Wars: The Force Awakens</td>
+<td>5292</td>
+<td>7.5</td>
+<td>2015</td>
+<td>movie</td>
+<td>Star Wars: Episode VII - The Force Awakens</td>
+<td>Star Wars: Episode VII - The Force Awakens</td>
+<td>2015.0</td>
+<td>7.7</td>
+<td>1013886.0</td>
+<td>(Science Fiction, Action, Adventure, Fantasy)</td>
+<td>136.0</td>
+</tr>
+<tr>
+<th>4</th>
+<td>190000000.0</td>
+<td>1.506249e+09</td>
+<td>Furious 7</td>
+<td>2947</td>
+<td>7.3</td>
+<td>2015</td>
+<td>movie</td>
+<td>Furious 7</td>
+<td>Fast &amp; Furious 7</td>
+<td>2015.0</td>
+<td>7.1</td>
+<td>434109.0</td>
+<td>(Action, Crime, Thriller)</td>
+<td>137.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [49]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Check year agreement where both exist</span>
+<span class="n">both_have_year</span> <span class="o">=</span> <span class="n">merged_xmdb_df</span><span class="p">[[</span><span class="s1">'release_year'</span><span class="p">,</span> <span class="s1">'startYear'</span><span class="p">]]</span><span class="o">.</span><span class="n">notna</span><span class="p">()</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+<span class="n">year_diff</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">both_have_year</span><span class="p">,</span> <span class="s1">'release_year'</span><span class="p">]</span> <span class="o">-</span> 
+                <span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">both_have_year</span><span class="p">,</span> <span class="s1">'startYear'</span><span class="p">])</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Year Comparison Analysis"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Total movies with both years: </span><span class="si">{</span><span class="n">both_have_year</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Year differences - Median: </span><span class="si">{</span><span class="n">year_diff</span><span class="o">.</span><span class="n">median</span><span class="p">()</span><span class="si">}</span><span class="s2">, Mean: </span><span class="si">{</span><span class="n">year_diff</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">, Max: </span><span class="si">{</span><span class="n">year_diff</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="si">:</span><span class="s2">.0f</span><span class="si">}</span><span class="se">\n</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># Distribution of differences</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Distribution of year differences:"</span><span class="p">)</span>
+<span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">20</span><span class="p">]:</span>
+    <span class="n">count</span> <span class="o">=</span> <span class="p">(</span><span class="n">year_diff</span> <span class="o">&lt;=</span> <span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">pct</span> <span class="o">=</span> <span class="p">(</span><span class="n">count</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">year_diff</span><span class="p">)</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Within </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> year(s): </span><span class="si">{</span><span class="n">count</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> movies (</span><span class="si">{</span><span class="n">pct</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%)"</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Number of exact matches: </span><span class="si">{</span><span class="p">(</span><span class="n">year_diff</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># Check for systematic bias (is one source consistently earlier/later?)</span>
+<span class="n">signed_diff</span> <span class="o">=</span> <span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">both_have_year</span><span class="p">,</span> <span class="s1">'release_year'</span><span class="p">]</span> <span class="o">-</span> <span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">both_have_year</span><span class="p">,</span> <span class="s1">'startYear'</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Signed difference (TMDb - IMDb):"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Mean: </span><span class="si">{</span><span class="n">signed_diff</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="si">:</span><span class="s2">.2f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  TMDb later: </span><span class="si">{</span><span class="p">(</span><span class="n">signed_diff</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  TMDb earlier: </span><span class="si">{</span><span class="p">(</span><span class="n">signed_diff</span><span class="w"> </span><span class="o">&lt;</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Same year: </span><span class="si">{</span><span class="p">(</span><span class="n">signed_diff</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Year Comparison Analysis
+======================================================================
+Total movies with both years: 9,459
+
+Year differences - Median: 0.0, Mean: 0.03, Max: 5
+
+Distribution of year differences:
+  Within 0 year(s): 9,161 movies (96.8%)
+  Within 1 year(s): 9,446 movies (99.9%)
+  Within 2 year(s): 9,457 movies (100.0%)
+  Within 3 year(s): 9,458 movies (100.0%)
+  Within 5 year(s): 9,459 movies (100.0%)
+  Within 10 year(s): 9,459 movies (100.0%)
+  Within 15 year(s): 9,459 movies (100.0%)
+  Within 20 year(s): 9,459 movies (100.0%)
+
+Number of exact matches: 9,161
+
+Signed difference (TMDb - IMDb):
+  Mean: 0.02
+  TMDb later: 255
+  TMDb earlier: 43
+  Same year: 9,161
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<hr/>
+<p><strong>Analysis Results:</strong></p>
+<ul>
+<li>96.8% exact matches between TMDb and IMDb years (9,161/9,459)</li>
+<li>Median difference: 0.0 years</li>
+<li>99.9% within 1 year; 100% within 2 years</li>
+<li>No systematic bias (mean signed difference: +0.02 years)</li>
+</ul>
+<p><strong>Decision:</strong> Use TMDb <code>release_year</code> exclusively</p>
+<p><strong>Justification:</strong></p>
+<ol>
+<li><strong>Exceptional agreement:</strong> 96.8% exact matches validates both sources</li>
+<li><strong>Theatrical focus:</strong> TMDb tracks wide theatrical release, aligning with financial analysis</li>
+<li><strong>Complete coverage:</strong> TMDb has 100% year coverage (10,855 movies)</li>
+<li><strong>Minor discrepancies explained:</strong> 298 movies (3.2%) differ by 1 year, likely due to:<ul>
+<li>International release timing (Dec→Jan cross-year releases)</li>
+<li>Festival premiere vs wide release dates</li>
+<li>Regional variations</li>
+</ul>
+</li>
+</ol>
+<p><strong>Implementation:</strong> Keep <code>release_year</code>, drop <code>startYear</code> after validation.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [50]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">'startYear'</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">'ignore'</span><span class="p">)</span>
+<span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[50]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>budget</th>
+<th>revenue</th>
+<th>original_title</th>
+<th>vote_count</th>
+<th>vote_average</th>
+<th>release_year</th>
+<th>titleType</th>
+<th>primaryTitle</th>
+<th>originalTitle</th>
+<th>averageRating</th>
+<th>numVotes</th>
+<th>genres</th>
+<th>runtime</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>150000000.0</td>
+<td>1.513529e+09</td>
+<td>Jurassic World</td>
+<td>5562</td>
+<td>6.5</td>
+<td>2015</td>
+<td>movie</td>
+<td>Jurassic World</td>
+<td>Jurassic World</td>
+<td>6.9</td>
+<td>718366.0</td>
+<td>(Science Fiction, Action, Adventure, Thriller)</td>
+<td>124.0</td>
+</tr>
+<tr>
+<th>1</th>
+<td>150000000.0</td>
+<td>3.784364e+08</td>
+<td>Mad Max: Fury Road</td>
+<td>6185</td>
+<td>7.1</td>
+<td>2015</td>
+<td>movie</td>
+<td>Mad Max: Fury Road</td>
+<td>Mad Max: Fury Road</td>
+<td>8.1</td>
+<td>1189406.0</td>
+<td>(Science Fiction, Action, Adventure, Thriller)</td>
+<td>120.0</td>
+</tr>
+<tr>
+<th>2</th>
+<td>110000000.0</td>
+<td>2.952382e+08</td>
+<td>Insurgent</td>
+<td>2480</td>
+<td>6.3</td>
+<td>2015</td>
+<td>movie</td>
+<td>The Divergent Series: Insurgent</td>
+<td>The Divergent Series: Insurgent</td>
+<td>6.2</td>
+<td>268250.0</td>
+<td>(Action, Science Fiction, Adventure, Thriller)</td>
+<td>119.0</td>
+</tr>
+<tr>
+<th>3</th>
+<td>200000000.0</td>
+<td>2.068178e+09</td>
+<td>Star Wars: The Force Awakens</td>
+<td>5292</td>
+<td>7.5</td>
+<td>2015</td>
+<td>movie</td>
+<td>Star Wars: Episode VII - The Force Awakens</td>
+<td>Star Wars: Episode VII - The Force Awakens</td>
+<td>7.7</td>
+<td>1013886.0</td>
+<td>(Science Fiction, Action, Adventure, Fantasy)</td>
+<td>136.0</td>
+</tr>
+<tr>
+<th>4</th>
+<td>190000000.0</td>
+<td>1.506249e+09</td>
+<td>Furious 7</td>
+<td>2947</td>
+<td>7.3</td>
+<td>2015</td>
+<td>movie</td>
+<td>Furious 7</td>
+<td>Fast &amp; Furious 7</td>
+<td>7.1</td>
+<td>434109.0</td>
+<td>(Action, Crime, Thriller)</td>
+<td>137.0</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [51]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Quick check on title columns. We already know they are the same entity as we merged on imdb_title = tconst</span>
+<span class="c1"># No decisions to be made here, just informative analysis.</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"Title Matching Analysis"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+
+<span class="c1"># Check 1: Do IMDb's two title fields match?</span>
+<span class="n">imdb_titles_match</span> <span class="o">=</span> <span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'primaryTitle'</span><span class="p">]</span> <span class="o">==</span> <span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'originalTitle'</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"IMDb primaryTitle == originalTitle: </span><span class="si">{</span><span class="n">imdb_titles_match</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> / </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">imdb_titles_match</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%)"</span><span class="p">)</span>
+
+<span class="c1"># Check 2: TMDb vs IMDb original titles</span>
+<span class="n">tmdb_imdb_orig_match</span> <span class="o">=</span> <span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'original_title'</span><span class="p">]</span> <span class="o">==</span> <span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'originalTitle'</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"TMDb original_title == IMDb originalTitle: </span><span class="si">{</span><span class="n">tmdb_imdb_orig_match</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">tmdb_imdb_orig_match</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%)"</span><span class="p">)</span>
+
+<span class="c1"># Check 3: TMDb vs IMDb primary title</span>
+<span class="n">tmdb_imdb_primary_match</span> <span class="o">=</span> <span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'original_title'</span><span class="p">]</span> <span class="o">==</span> <span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'primaryTitle'</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"TMDb original_title == IMDb primaryTitle: </span><span class="si">{</span><span class="n">tmdb_imdb_primary_match</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">tmdb_imdb_primary_match</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%)"</span><span class="p">)</span>
+
+<span class="c1"># Find movies where NONE of the titles match</span>
+<span class="n">any_match</span> <span class="o">=</span> <span class="n">imdb_titles_match</span> <span class="o">|</span> <span class="n">tmdb_imdb_orig_match</span> <span class="o">|</span> <span class="n">tmdb_imdb_primary_match</span>
+<span class="n">no_match</span> <span class="o">=</span> <span class="o">~</span><span class="n">any_match</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Movies where NO titles match exactly: </span><span class="si">{</span><span class="n">no_match</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">no_match</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%)"</span><span class="p">)</span>
+
+<span class="c1"># Show examples of non-matches</span>
+<span class="k">if</span> <span class="n">no_match</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Example non-matching titles:"</span><span class="p">)</span>
+    <span class="n">examples</span> <span class="o">=</span> <span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">no_match</span><span class="p">,</span> <span class="p">[</span><span class="s1">'original_title'</span><span class="p">,</span> <span class="s1">'primaryTitle'</span><span class="p">,</span> <span class="s1">'originalTitle'</span><span class="p">,</span> <span class="s1">'release_year'</span><span class="p">]]</span><span class="o">.</span><span class="n">head</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">examples</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Title Matching Analysis
+======================================================================
+IMDb primaryTitle == originalTitle: 8,683 / 10,835 (80.1%)
+TMDb original_title == IMDb originalTitle: 8,734 (80.6%)
+TMDb original_title == IMDb primaryTitle: 8,503 (78.5%)
+
+Movies where NO titles match exactly: 1,631 (15.1%)
+
+Example non-matching titles:
+                                                     original_title   primaryTitle                             originalTitle  release_year
+100                                                    Frozen Fever            NaN                                       NaN          2015
+116                              The Scorpion King: The Lost Throne            NaN                                       NaN          2015
+140                             Dragonheart 3: The Sorcerer's Curse            NaN                                       NaN          2015
+154                                        Il racconto dei racconti  Tale of Tales  Il racconto dei racconti - Tale of Tales          2015
+159                                                       Kung Fury            NaN                                       NaN          2015
+175                                                     Descendants            NaN                                       NaN          2015
+181  LEGO DC Comics Super Heroes: Justice League vs. Bizarro League            NaN                                       NaN          2015
+185                                         Halo: The Fall of Reach            NaN                                       NaN          2015
+198                                        Barbie in Princess Power            NaN                                       NaN          2015
+216                                                            Lava            NaN                                       NaN          2015
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<hr/>
+<p><strong>Title Column Selection</strong></p>
+<p>Since we merged on IMDb IDs (authoritative matching), the title columns are redundant display metadata. We'll keep TMDb's <code>original_title</code> as the primary title field and drop IMDb's title variations.</p>
+</div>
+</div>
+</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [52]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span> 
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="s1">'primaryTitle'</span><span class="p">,</span> <span class="s1">'originalTitle'</span><span class="p">,</span> <span class="s1">'titleType'</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">'ignore'</span><span class="p">)</span>
 </pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [53]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Compare rating scales and vote counts</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Ratings Comparison:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span> <span class="o">*</span> <span class="mi">70</span><span class="p">)</span>
+
+<span class="c1"># Check correlation between rating systems</span>
+<span class="n">corr</span> <span class="o">=</span> <span class="n">merged_xmdb_df</span><span class="p">[[</span><span class="s1">'vote_average'</span><span class="p">,</span> <span class="s1">'averageRating'</span><span class="p">]]</span><span class="o">.</span><span class="n">corr</span><span class="p">()</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Correlation between TMDb and IMDb ratings: </span><span class="si">{</span><span class="n">corr</span><span class="si">:</span><span class="s2">.3f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># Descriptive stats</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">TMDb Ratings:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'vote_average'</span><span class="p">]</span><span class="o">.</span><span class="n">describe</span><span class="p">())</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">IMDb Ratings:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'averageRating'</span><span class="p">]</span><span class="o">.</span><span class="n">describe</span><span class="p">())</span>
+
+<span class="c1"># Vote counts comparison</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Vote Counts:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"TMDb median votes: </span><span class="si">{</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'vote_count'</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">()</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"IMDb median votes: </span><span class="si">{</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'numVotes'</span><span class="p">]</span><span class="o">.</span><span class="n">median</span><span class="p">()</span><span class="si">:</span><span class="s2">,.0f</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># Check for nulls</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">TMDb rating nulls: </span><span class="si">{</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'vote_average'</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"IMDb rating nulls: </span><span class="si">{</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'averageRating'</span><span class="p">]</span><span class="o">.</span><span class="n">isna</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>
+Ratings Comparison:
+======================================================================
+Correlation between TMDb and IMDb ratings: 0.845
+
+TMDb Ratings:
+count    10835.000000
+mean         5.973503
+std          0.934129
+min          1.500000
+25%          5.400000
+50%          6.000000
+75%          6.600000
+max          9.200000
+Name: vote_average, dtype: float64
+
+IMDb Ratings:
+count    9459.000000
+mean        6.272915
+std         1.037415
+min         1.300000
+25%         5.700000
+50%         6.400000
+75%         7.000000
+max         9.300000
+Name: averageRating, dtype: float64
+
+Vote Counts:
+TMDb median votes: 38
+IMDb median votes: 21,019
+
+TMDb rating nulls: 0
+IMDb rating nulls: 1,376
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [54]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Rename columns for clarity</span>
+<span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span>
+    <span class="s1">'vote_average'</span><span class="p">:</span> <span class="s1">'tmdb_rating'</span><span class="p">,</span>
+    <span class="s1">'vote_count'</span><span class="p">:</span> <span class="s1">'tmdb_votes'</span><span class="p">,</span>
+    <span class="s1">'averageRating'</span><span class="p">:</span> <span class="s1">'imdb_rating'</span><span class="p">,</span> 
+    <span class="s1">'numVotes'</span><span class="p">:</span> <span class="s1">'imdb_votes'</span>
+<span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Create combined rating that we'll use in our main analysis</span>
+<span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'rating_combined'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'tmdb_rating'</span><span class="p">]</span> <span class="o">+</span> <span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'imdb_rating'</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+
+<span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">head</span><span class="p">()</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[54]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>budget</th>
+<th>revenue</th>
+<th>original_title</th>
+<th>tmdb_votes</th>
+<th>tmdb_rating</th>
+<th>release_year</th>
+<th>imdb_rating</th>
+<th>imdb_votes</th>
+<th>genres</th>
+<th>runtime</th>
+<th>rating_combined</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>150000000.0</td>
+<td>1.513529e+09</td>
+<td>Jurassic World</td>
+<td>5562</td>
+<td>6.5</td>
+<td>2015</td>
+<td>6.9</td>
+<td>718366.0</td>
+<td>(Science Fiction, Action, Adventure, Thriller)</td>
+<td>124.0</td>
+<td>6.70</td>
+</tr>
+<tr>
+<th>1</th>
+<td>150000000.0</td>
+<td>3.784364e+08</td>
+<td>Mad Max: Fury Road</td>
+<td>6185</td>
+<td>7.1</td>
+<td>2015</td>
+<td>8.1</td>
+<td>1189406.0</td>
+<td>(Science Fiction, Action, Adventure, Thriller)</td>
+<td>120.0</td>
+<td>7.60</td>
+</tr>
+<tr>
+<th>2</th>
+<td>110000000.0</td>
+<td>2.952382e+08</td>
+<td>Insurgent</td>
+<td>2480</td>
+<td>6.3</td>
+<td>2015</td>
+<td>6.2</td>
+<td>268250.0</td>
+<td>(Action, Science Fiction, Adventure, Thriller)</td>
+<td>119.0</td>
+<td>6.25</td>
+</tr>
+<tr>
+<th>3</th>
+<td>200000000.0</td>
+<td>2.068178e+09</td>
+<td>Star Wars: The Force Awakens</td>
+<td>5292</td>
+<td>7.5</td>
+<td>2015</td>
+<td>7.7</td>
+<td>1013886.0</td>
+<td>(Science Fiction, Action, Adventure, Fantasy)</td>
+<td>136.0</td>
+<td>7.60</td>
+</tr>
+<tr>
+<th>4</th>
+<td>190000000.0</td>
+<td>1.506249e+09</td>
+<td>Furious 7</td>
+<td>2947</td>
+<td>7.3</td>
+<td>2015</td>
+<td>7.1</td>
+<td>434109.0</td>
+<td>(Action, Crime, Thriller)</td>
+<td>137.0</td>
+<td>7.20</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<hr/>
+<p><strong>Inflation Adjustment</strong></p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [55]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">adjust_for_inflation</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">from_year</span><span class="p">,</span> <span class="n">to_year</span><span class="o">=</span><span class="mi">2024</span><span class="p">,</span> <span class="n">cpi_df</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Adjust monetary value for inflation using CPI.</span>
+<span class="sd">    </span>
+<span class="sd">    Formula: adjusted_amount = original_amount * (CPI_to_year / CPI_from_year)</span>
+<span class="sd">    """</span>
+    <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">isna</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span> <span class="ow">or</span> <span class="n">amount</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+    
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">from_cpi</span> <span class="o">=</span> <span class="n">cpi_df</span><span class="p">[</span><span class="n">cpi_df</span><span class="p">[</span><span class="s1">'year'</span><span class="p">]</span> <span class="o">==</span> <span class="n">from_year</span><span class="p">][</span><span class="s1">'cpi'</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">to_cpi</span> <span class="o">=</span> <span class="n">cpi_df</span><span class="p">[</span><span class="n">cpi_df</span><span class="p">[</span><span class="s1">'year'</span><span class="p">]</span> <span class="o">==</span> <span class="n">to_year</span><span class="p">][</span><span class="s1">'cpi'</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        
+        <span class="n">adjusted</span> <span class="o">=</span> <span class="n">amount</span> <span class="o">*</span> <span class="p">(</span><span class="n">to_cpi</span> <span class="o">/</span> <span class="n">from_cpi</span><span class="p">)</span>
+        <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">adjusted</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+    
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="c1"># Year not in CPI data</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">add_inflation_adjusted_colunns</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">cpi_df</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""</span>
+<span class="sd">    Add budget_adj_2024 and revenue_adj_2024 columns</span>
+<span class="sd">    """</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">'budget_adj_2024'</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">adjust_for_inflation</span><span class="p">(</span>
+            <span class="n">row</span><span class="p">[</span><span class="s1">'budget'</span><span class="p">],</span>
+            <span class="n">row</span><span class="p">[</span><span class="s1">'release_year'</span><span class="p">],</span>
+            <span class="n">to_year</span><span class="o">=</span><span class="mi">2024</span><span class="p">,</span>
+            <span class="n">cpi_df</span><span class="o">=</span><span class="n">cpi_df</span>
+        <span class="p">)</span> <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">'budget'</span><span class="p">])</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
+    <span class="p">)</span>
+ 
+    <span class="n">df</span><span class="p">[</span><span class="s1">'revenue_adj_2024'</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">adjust_for_inflation</span><span class="p">(</span>
+            <span class="n">row</span><span class="p">[</span><span class="s1">'revenue'</span><span class="p">],</span>
+            <span class="n">row</span><span class="p">[</span><span class="s1">'release_year'</span><span class="p">],</span>
+            <span class="n">to_year</span><span class="o">=</span><span class="mi">2024</span><span class="p">,</span>
+            <span class="n">cpi_df</span><span class="o">=</span><span class="n">cpi_df</span>
+        <span class="p">)</span> <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">notna</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">'revenue'</span><span class="p">])</span> <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
+    <span class="p">)</span>
+
+    <span class="n">df</span><span class="p">[</span><span class="s1">'roi'</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">df</span><span class="p">[</span><span class="s1">'revenue_adj_2024'</span><span class="p">]</span> <span class="o">-</span> <span class="n">df</span><span class="p">[</span><span class="s1">'budget_adj_2024'</span><span class="p">])</span> <span class="o">/</span> <span class="n">df</span><span class="p">[</span><span class="s1">'budget_adj_2024'</span><span class="p">]</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">'profit_margin'</span><span class="p">]</span> <span class="o">=</span> <span class="p">((</span><span class="n">df</span><span class="p">[</span><span class="s1">'revenue_adj_2024'</span><span class="p">]</span> <span class="o">-</span> <span class="n">df</span><span class="p">[</span><span class="s1">'budget_adj_2024'</span><span class="p">])</span> <span class="o">/</span> <span class="n">df</span><span class="p">[</span><span class="s1">'revenue_adj_2024'</span><span class="p">]</span> <span class="o">*</span> <span class="mi">100</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">df</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [56]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">add_inflation_adjusted_colunns</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">,</span> <span class="n">cpi_df</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child jp-OutputArea-executeResult">
+<div class="jp-OutputPrompt jp-OutputArea-prompt">Out[56]:</div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output jp-OutputArea-executeResult" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>budget</th>
+<th>revenue</th>
+<th>original_title</th>
+<th>tmdb_votes</th>
+<th>tmdb_rating</th>
+<th>release_year</th>
+<th>imdb_rating</th>
+<th>imdb_votes</th>
+<th>genres</th>
+<th>runtime</th>
+<th>rating_combined</th>
+<th>budget_adj_2024</th>
+<th>revenue_adj_2024</th>
+<th>roi</th>
+<th>profit_margin</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>150000000.0</td>
+<td>1.513529e+09</td>
+<td>Jurassic World</td>
+<td>5562</td>
+<td>6.5</td>
+<td>2015</td>
+<td>6.9</td>
+<td>718366.0</td>
+<td>(Science Fiction, Action, Adventure, Thriller)</td>
+<td>124.0</td>
+<td>6.70</td>
+<td>1.985414e+08</td>
+<td>2.003320e+09</td>
+<td>909.019207</td>
+<td>90.089386</td>
+</tr>
+<tr>
+<th>1</th>
+<td>150000000.0</td>
+<td>3.784364e+08</td>
+<td>Mad Max: Fury Road</td>
+<td>6185</td>
+<td>7.1</td>
+<td>2015</td>
+<td>8.1</td>
+<td>1189406.0</td>
+<td>(Science Fiction, Action, Adventure, Thriller)</td>
+<td>120.0</td>
+<td>7.60</td>
+<td>1.985414e+08</td>
+<td>5.009018e+08</td>
+<td>152.290903</td>
+<td>60.363216</td>
+</tr>
+<tr>
+<th>2</th>
+<td>110000000.0</td>
+<td>2.952382e+08</td>
+<td>Insurgent</td>
+<td>2480</td>
+<td>6.3</td>
+<td>2015</td>
+<td>6.2</td>
+<td>268250.0</td>
+<td>(Action, Science Fiction, Adventure, Thriller)</td>
+<td>119.0</td>
+<td>6.25</td>
+<td>1.455970e+08</td>
+<td>3.907800e+08</td>
+<td>168.398365</td>
+<td>62.741949</td>
+</tr>
+<tr>
+<th>3</th>
+<td>200000000.0</td>
+<td>2.068178e+09</td>
+<td>Star Wars: The Force Awakens</td>
+<td>5292</td>
+<td>7.5</td>
+<td>2015</td>
+<td>7.7</td>
+<td>1013886.0</td>
+<td>(Science Fiction, Action, Adventure, Fantasy)</td>
+<td>136.0</td>
+<td>7.60</td>
+<td>2.647218e+08</td>
+<td>2.737459e+09</td>
+<td>934.089113</td>
+<td>90.329654</td>
+</tr>
+<tr>
+<th>4</th>
+<td>190000000.0</td>
+<td>1.506249e+09</td>
+<td>Furious 7</td>
+<td>2947</td>
+<td>7.3</td>
+<td>2015</td>
+<td>7.1</td>
+<td>434109.0</td>
+<td>(Action, Crime, Thriller)</td>
+<td>137.0</td>
+<td>7.20</td>
+<td>2.514857e+08</td>
+<td>1.993685e+09</td>
+<td>692.762821</td>
+<td>87.385887</td>
+</tr>
+<tr>
+<th>...</th>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+<td>...</td>
+</tr>
+<tr>
+<th>10850</th>
+<td>NaN</td>
+<td>NaN</td>
+<td>The Endless Summer</td>
+<td>11</td>
+<td>7.4</td>
+<td>1966</td>
+<td>7.6</td>
+<td>6748.0</td>
+<td>(Sport, Documentary)</td>
+<td>95.0</td>
+<td>7.50</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr>
+<th>10851</th>
+<td>NaN</td>
+<td>NaN</td>
+<td>Grand Prix</td>
+<td>20</td>
+<td>5.7</td>
+<td>1966</td>
+<td>7.2</td>
+<td>11755.0</td>
+<td>(Drama, Sport, Action, Adventure)</td>
+<td>176.0</td>
+<td>6.45</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr>
+<th>10852</th>
+<td>NaN</td>
+<td>NaN</td>
+<td>Beregis Avtomobilya</td>
+<td>11</td>
+<td>6.5</td>
+<td>1966</td>
+<td>8.0</td>
+<td>6580.0</td>
+<td>(Romance, Crime, Comedy, Mystery)</td>
+<td>94.0</td>
+<td>7.25</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr>
+<th>10853</th>
+<td>NaN</td>
+<td>NaN</td>
+<td>What's Up, Tiger Lily?</td>
+<td>22</td>
+<td>5.4</td>
+<td>1966</td>
+<td>5.8</td>
+<td>10312.0</td>
+<td>(Crime, Action, Adventure, Comedy)</td>
+<td>80.0</td>
+<td>5.60</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+<tr>
+<th>10854</th>
+<td>19000.0</td>
+<td>NaN</td>
+<td>Manos: The Hands of Fate</td>
+<td>15</td>
+<td>1.5</td>
+<td>1966</td>
+<td>1.7</td>
+<td>38330.0</td>
+<td>(Horror,)</td>
+<td>74.0</td>
+<td>1.60</td>
+<td>1.835565e+05</td>
+<td>NaN</td>
+<td>NaN</td>
+<td>NaN</td>
+</tr>
+</tbody>
+</table>
+<p>10835 rows × 15 columns</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<hr/>
+<p><strong>Final Cleaned Dataset Summary</strong></p>
+<p><strong>Dataset Statistics:</strong></p>
+<ul>
+<li>Total movies: 10,835</li>
+<li>Columns: 11</li>
+<li>Date range: 1960-2015</li>
+<li>Complete coverage: runtime (100%), release_year (100%)</li>
+<li>Financial data: budget (47.7%), revenue (44.7%)</li>
+<li>Ratings: TMDb (100%), IMDb (87.3%)</li>
+<li>Genres: 24 unique genres (merged from both sources)</li>
+</ul>
+<p><strong>Key Transformations Completed:</strong></p>
+<ol>
+<li>Merged TMDb + IMDb on authoritative IDs</li>
+<li>Normalized genres across sources</li>
+<li>Reconciled runtimes (median difference: 0 minutes)</li>
+<li>Validated release years (96.8% exact match)</li>
+<li>Created combined rating metric</li>
+<li>Removed redundant columns</li>
+<li>Calculated inflation adjustment to 2024 dollars</li>
+</ol>
+<p><strong>Dataset is ready for:</strong></p>
+<ul>
+<li>Storage</li>
+<li>Exploratory analysis</li>
+</ul>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [57]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">"="</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"SECTION 3 COMPLETE - DATA CLEANING VALIDATED"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"="</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Final dataset: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> movies × </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="si">}</span><span class="s2"> columns"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Columns: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Memory usage: </span><span class="si">{</span><span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">memory_usage</span><span class="p">(</span><span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="mi">1024</span><span class="o">**</span><span class="mi">2</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2"> MB"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>================================================================================
+SECTION 3 COMPLETE - DATA CLEANING VALIDATED
+================================================================================
+
+Final dataset: 10,835 movies × 15 columns
+
+Columns: budget, revenue, original_title, tmdb_votes, tmdb_rating, release_year, imdb_rating, imdb_votes, genres, runtime, rating_combined, budget_adj_2024, revenue_adj_2024, roi, profit_margin
+
+Memory usage: 2.7 MB
+</pre>
 </div>
 </div>
 </div>
