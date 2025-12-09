@@ -1,7 +1,6 @@
 # 🎬 Streaming vs Theatrical: A Data-Driven Analysis of Movie Distribution
 
-[![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/downloads/)
-[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python](https://img.shields.io/badge/Python-3.14-blue.svg)](https://www.python.org/downloads/)
 [![Jupyter](https://img.shields.io/badge/Jupyter-Notebook-orange.svg)](https://jupyter.org/)
 [![Status](https://img.shields.io/badge/Status-Complete-success.svg)]()
 
