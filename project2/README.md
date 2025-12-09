@@ -33,10 +33,10 @@ By integrating 6 different data sources including TMDb, IMDb, Netflix, Hulu, Dis
 ```
 /project2
 ├── data/
-│   ├── raw/                          # Original unmodified datasets
-│   └── clean/                        # Processed analysis-ready datasets
+│   ├── raw/                                  # Original unmodified datasets
+│   └── clean/                                # Processed analysis-ready datasets
 ├── data_wrangling_project_starter.ipynb      # Main analysis notebook
-├── README.md                         # This file
+├── README.md                                 # This file
 ```
 
 ---
