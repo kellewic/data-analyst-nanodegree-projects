@@ -7590,6 +7590,7 @@ a.anchor-link {
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Import statements for packages used in analysis</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">httpx</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">re</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">zlib</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">matplotlib.pyplot</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">plt</span>
@@ -7599,6 +7600,7 @@ a.anchor-link {
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">dotenv</span><span class="w"> </span><span class="kn">import</span> <span class="n">load_dotenv</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pandas.api.types</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_numeric_dtype</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">unidecode</span><span class="w"> </span><span class="kn">import</span> <span class="n">unidecode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">urllib.parse</span><span class="w"> </span><span class="kn">import</span> <span class="n">urlparse</span>
 
 <span class="c1">## It's OK if this file doesn't exist as the API results are </span>
@@ -7612,6 +7614,9 @@ a.anchor-link {
 <span class="c1"># Set default figure size for better readability</span>
 <span class="n">sb</span><span class="o">.</span><span class="n">set_style</span><span class="p">(</span><span class="s1">'whitegrid'</span><span class="p">)</span>
 <span class="n">plt</span><span class="o">.</span><span class="n">rcParams</span><span class="p">[</span><span class="s1">'figure.figsize'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">12</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
+
+<span class="n">RAW_DATA_PATH</span> <span class="o">=</span> <span class="s1">'data/raw'</span>
+<span class="n">CLEAN_DATA_PATH</span><span class="o">=</span><span class="s1">'data/clean'</span>
 </pre></div>
 </div>
 </div>
@@ -7626,10 +7631,10 @@ a.anchor-link {
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1">## Data gathering and display functions</span>
-<span class="k">def</span><span class="w"> </span><span class="nf">download_and_save_file</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">local_filename</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">"data/raw"</span><span class="p">,</span> <span class="n">download_if_exists</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">download_and_save_file</span><span class="p">(</span><span class="n">url</span><span class="p">,</span> <span class="n">local_filename</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">RAW_DATA_PATH</span><span class="p">,</span> <span class="n">download_if_exists</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Downloads a file from a URL and saves it locally.</span>
-<span class="sd">    By default the file is saved to the data/raw path.</span>
+<span class="sd">    By default the file is saved to 'RAW_DATA_PATH' path.</span>
 <span class="sd">    </span>
 <span class="sd">    If the file is gzipped, it's decompressed on-the-fly and</span>
 <span class="sd">    written as uncompressed data.</span>
@@ -7781,7 +7786,7 @@ TMDb serves as the core theatrical release dataset because it combines financial
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Load dataset</span>
-<span class="n">tmdb_movies_raw_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">'data/raw/tmdb_movies_data.csv'</span><span class="p">)</span>
+<span class="n">tmdb_movies_raw_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">RAW_DATA_PATH</span><span class="si">}</span><span class="s1">/tmdb_movies_data.csv'</span><span class="p">)</span>
 
 <span class="n">display_shape</span><span class="p">(</span><span class="n">tmdb_movies_raw_df</span><span class="p">)</span>
 <span class="n">display</span><span class="p">(</span><span class="n">tmdb_movies_raw_df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
@@ -8018,19 +8023,6 @@ IMDb's rating system is well-established and trusted, providing an alternative m
 </div>
 </div>
 </div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<blockquote>
-<p><strong>title.basics.tsv.gz</strong> - Core movie metadata</p>
-</blockquote>
-</div>
-</div>
-</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -8046,7 +8038,7 @@ IMDb's rating system is well-established and trusted, providing an alternative m
 <span class="n">download_and_save_file</span><span class="p">(</span><span class="n">URL</span><span class="p">,</span> <span class="n">LOCAL_FILE</span><span class="p">)</span>
 
 <span class="c1"># Load dataset - note that this dataset is quite large at almost 1GB on disk</span>
-<span class="n">imdb_title_basics_raw_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">f</span><span class="s1">'data/raw/</span><span class="si">{</span><span class="n">LOCAL_FILE</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">'</span><span class="se">\t</span><span class="s1">'</span><span class="p">)</span>
+<span class="n">imdb_title_basics_raw_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">RAW_DATA_PATH</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">LOCAL_FILE</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">'</span><span class="se">\t</span><span class="s1">'</span><span class="p">)</span>
 
 <span class="n">display_shape</span><span class="p">(</span><span class="n">imdb_title_basics_raw_df</span><span class="p">)</span>
 <span class="n">display</span><span class="p">(</span><span class="n">imdb_title_basics_raw_df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
@@ -8170,19 +8162,6 @@ Columns: 9
 </div>
 </div>
 </div>
-</div>
-<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
-<div class="jp-Cell-inputWrapper" tabindex="0">
-<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
-</div>
-<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
-</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<blockquote>
-<p><strong>title.ratings.tsv.gz</strong> - Community ratings</p>
-</blockquote>
-</div>
-</div>
-</div>
 </div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
@@ -8198,7 +8177,7 @@ Columns: 9
 <span class="n">download_and_save_file</span><span class="p">(</span><span class="n">URL</span><span class="p">,</span> <span class="n">LOCAL_FILE</span><span class="p">)</span>
 
 <span class="c1"># Load dataset</span>
-<span class="n">imdb_title_ratings_raw_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">f</span><span class="s1">'data/raw/</span><span class="si">{</span><span class="n">LOCAL_FILE</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">'</span><span class="se">\t</span><span class="s1">'</span><span class="p">)</span>
+<span class="n">imdb_title_ratings_raw_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">RAW_DATA_PATH</span><span class="si">}</span><span class="s1">/</span><span class="si">{</span><span class="n">LOCAL_FILE</span><span class="si">}</span><span class="s1">'</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="s1">'</span><span class="se">\t</span><span class="s1">'</span><span class="p">)</span>
 
 <span class="n">display_shape</span><span class="p">(</span><span class="n">imdb_title_ratings_raw_df</span><span class="p">)</span>
 <span class="n">display</span><span class="p">(</span><span class="n">imdb_title_ratings_raw_df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
@@ -8356,7 +8335,7 @@ Streaming platforms represent the industry's future, but comprehensive availabil
 <div class="highlight hl-ipython3"><pre><span></span><span class="c1"># I decided to manually load these datasets into the project.</span>
 <span class="c1"># Working with the kaggle and kagglehub Python packages is more trouble than it's worth.</span>
 
-<span class="n">amazon_prime_titles_raw_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">'data/raw/amazon_prime_titles.csv'</span><span class="p">)</span>
+<span class="n">amazon_prime_titles_raw_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">RAW_DATA_PATH</span><span class="si">}</span><span class="s1">/amazon_prime_titles.csv'</span><span class="p">)</span>
 <span class="n">display_shape</span><span class="p">(</span><span class="n">amazon_prime_titles_raw_df</span><span class="p">)</span>
 <span class="n">display</span><span class="p">(</span><span class="n">amazon_prime_titles_raw_df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
 </pre></div>
@@ -8517,7 +8496,7 @@ Columns: 12
 <div class="jp-InputPrompt jp-InputArea-prompt">In [7]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">disney_plus_titles_raw_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">'data/raw/disney_plus_titles.csv'</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">disney_plus_titles_raw_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">RAW_DATA_PATH</span><span class="si">}</span><span class="s1">/disney_plus_titles.csv'</span><span class="p">)</span>
 <span class="n">display_shape</span><span class="p">(</span><span class="n">disney_plus_titles_raw_df</span><span class="p">)</span>
 <span class="n">display</span><span class="p">(</span><span class="n">disney_plus_titles_raw_df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
 </pre></div>
@@ -8678,7 +8657,7 @@ Columns: 12
 <div class="jp-InputPrompt jp-InputArea-prompt">In [8]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">hulu_titles_raw_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">'data/raw/hulu_titles.csv'</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">hulu_titles_raw_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">RAW_DATA_PATH</span><span class="si">}</span><span class="s1">/hulu_titles.csv'</span><span class="p">)</span>
 <span class="n">display_shape</span><span class="p">(</span><span class="n">hulu_titles_raw_df</span><span class="p">)</span>
 <span class="n">display</span><span class="p">(</span><span class="n">hulu_titles_raw_df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
 </pre></div>
@@ -8839,7 +8818,7 @@ Columns: 12
 <div class="jp-InputPrompt jp-InputArea-prompt">In [9]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="n">netflix_titles_raw_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="s1">'data/raw/netflix_titles.csv'</span><span class="p">)</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">netflix_titles_raw_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">RAW_DATA_PATH</span><span class="si">}</span><span class="s1">/netflix_titles.csv'</span><span class="p">)</span>
 <span class="n">display_shape</span><span class="p">(</span><span class="n">netflix_titles_raw_df</span><span class="p">)</span>
 <span class="n">display</span><span class="p">(</span><span class="n">netflix_titles_raw_df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
 </pre></div>
@@ -9019,7 +8998,7 @@ revenue_adj_2024 = revenue_original × (CPI_2024 / CPI_release_year)
 <div class="jp-InputPrompt jp-InputArea-prompt">In [10]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_cpi_data</span><span class="p">(</span><span class="n">start_year</span><span class="o">=</span><span class="mi">1960</span><span class="p">,</span> <span class="n">end_year</span><span class="o">=</span><span class="mi">2025</span><span class="p">,</span> <span class="n">local_filename</span><span class="o">=</span><span class="s1">'cpi_data.json'</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s2">"data/raw"</span><span class="p">,</span> <span class="n">download_if_exists</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">get_cpi_data</span><span class="p">(</span><span class="n">start_year</span><span class="o">=</span><span class="mi">1960</span><span class="p">,</span> <span class="n">end_year</span><span class="o">=</span><span class="mi">2025</span><span class="p">,</span> <span class="n">local_filename</span><span class="o">=</span><span class="s1">'cpi_data.json'</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">RAW_DATA_PATH</span><span class="p">,</span> <span class="n">download_if_exists</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">"""</span>
 <span class="sd">    Get CPI data from FRED API</span>
 <span class="sd">    CPI-U (Consumer Price Index for all Urban consumers)</span>
@@ -12401,7 +12380,7 @@ Rows in XMDb with no genre: 0
 <td>(Action, Adventure, Science Fiction)</td>
 <td>6.9</td>
 <td>718366.0</td>
-<td>(Science Fiction, Action, Adventure, Thriller)</td>
+<td>(Science Fiction, Thriller, Adventure, Action)</td>
 </tr>
 <tr>
 <th>1</th>
@@ -12421,7 +12400,7 @@ Rows in XMDb with no genre: 0
 <td>(Action, Adventure, Science Fiction)</td>
 <td>8.1</td>
 <td>1189406.0</td>
-<td>(Science Fiction, Action, Adventure, Thriller)</td>
+<td>(Science Fiction, Thriller, Adventure, Action)</td>
 </tr>
 <tr>
 <th>2</th>
@@ -12441,7 +12420,7 @@ Rows in XMDb with no genre: 0
 <td>(Action, Adventure, Science Fiction)</td>
 <td>6.2</td>
 <td>268250.0</td>
-<td>(Action, Science Fiction, Adventure, Thriller)</td>
+<td>(Action, Thriller, Adventure, Science Fiction)</td>
 </tr>
 <tr>
 <th>3</th>
@@ -12461,7 +12440,7 @@ Rows in XMDb with no genre: 0
 <td>(Action, Adventure, Science Fiction)</td>
 <td>7.7</td>
 <td>1013886.0</td>
-<td>(Science Fiction, Action, Adventure, Fantasy)</td>
+<td>(Science Fiction, Fantasy, Adventure, Action)</td>
 </tr>
 <tr>
 <th>4</th>
@@ -12481,7 +12460,7 @@ Rows in XMDb with no genre: 0
 <td>(Action, Thriller)</td>
 <td>7.1</td>
 <td>434109.0</td>
-<td>(Action, Crime, Thriller)</td>
+<td>(Crime, Thriller, Action)</td>
 </tr>
 </tbody>
 </table>
@@ -12577,7 +12556,7 @@ Columns: 15
 <td>124.0</td>
 <td>6.9</td>
 <td>718366.0</td>
-<td>(Science Fiction, Action, Adventure, Thriller)</td>
+<td>(Science Fiction, Thriller, Adventure, Action)</td>
 </tr>
 <tr>
 <th>1</th>
@@ -12595,7 +12574,7 @@ Columns: 15
 <td>120.0</td>
 <td>8.1</td>
 <td>1189406.0</td>
-<td>(Science Fiction, Action, Adventure, Thriller)</td>
+<td>(Science Fiction, Thriller, Adventure, Action)</td>
 </tr>
 <tr>
 <th>2</th>
@@ -12613,7 +12592,7 @@ Columns: 15
 <td>119.0</td>
 <td>6.2</td>
 <td>268250.0</td>
-<td>(Action, Science Fiction, Adventure, Thriller)</td>
+<td>(Action, Thriller, Adventure, Science Fiction)</td>
 </tr>
 <tr>
 <th>3</th>
@@ -12631,7 +12610,7 @@ Columns: 15
 <td>138.0</td>
 <td>7.7</td>
 <td>1013886.0</td>
-<td>(Science Fiction, Action, Adventure, Fantasy)</td>
+<td>(Science Fiction, Fantasy, Adventure, Action)</td>
 </tr>
 <tr>
 <th>4</th>
@@ -12649,7 +12628,7 @@ Columns: 15
 <td>137.0</td>
 <td>7.1</td>
 <td>434109.0</td>
-<td>(Action, Crime, Thriller)</td>
+<td>(Crime, Thriller, Action)</td>
 </tr>
 </tbody>
 </table>
@@ -12874,7 +12853,7 @@ Name: runtime_final, dtype: float64
 <td>2015.0</td>
 <td>6.9</td>
 <td>718366.0</td>
-<td>(Science Fiction, Action, Adventure, Thriller)</td>
+<td>(Science Fiction, Thriller, Adventure, Action)</td>
 <td>124.0</td>
 </tr>
 <tr>
@@ -12891,7 +12870,7 @@ Name: runtime_final, dtype: float64
 <td>2015.0</td>
 <td>8.1</td>
 <td>1189406.0</td>
-<td>(Science Fiction, Action, Adventure, Thriller)</td>
+<td>(Science Fiction, Thriller, Adventure, Action)</td>
 <td>120.0</td>
 </tr>
 <tr>
@@ -12908,7 +12887,7 @@ Name: runtime_final, dtype: float64
 <td>2015.0</td>
 <td>6.2</td>
 <td>268250.0</td>
-<td>(Action, Science Fiction, Adventure, Thriller)</td>
+<td>(Action, Thriller, Adventure, Science Fiction)</td>
 <td>119.0</td>
 </tr>
 <tr>
@@ -12925,7 +12904,7 @@ Name: runtime_final, dtype: float64
 <td>2015.0</td>
 <td>7.7</td>
 <td>1013886.0</td>
-<td>(Science Fiction, Action, Adventure, Fantasy)</td>
+<td>(Science Fiction, Fantasy, Adventure, Action)</td>
 <td>136.0</td>
 </tr>
 <tr>
@@ -12942,7 +12921,7 @@ Name: runtime_final, dtype: float64
 <td>2015.0</td>
 <td>7.1</td>
 <td>434109.0</td>
-<td>(Action, Crime, Thriller)</td>
+<td>(Crime, Thriller, Action)</td>
 <td>137.0</td>
 </tr>
 </tbody>
@@ -13128,7 +13107,7 @@ Signed difference (TMDb - IMDb):
 <td>Jurassic World</td>
 <td>6.9</td>
 <td>718366.0</td>
-<td>(Science Fiction, Action, Adventure, Thriller)</td>
+<td>(Science Fiction, Thriller, Adventure, Action)</td>
 <td>124.0</td>
 </tr>
 <tr>
@@ -13144,7 +13123,7 @@ Signed difference (TMDb - IMDb):
 <td>Mad Max: Fury Road</td>
 <td>8.1</td>
 <td>1189406.0</td>
-<td>(Science Fiction, Action, Adventure, Thriller)</td>
+<td>(Science Fiction, Thriller, Adventure, Action)</td>
 <td>120.0</td>
 </tr>
 <tr>
@@ -13160,7 +13139,7 @@ Signed difference (TMDb - IMDb):
 <td>The Divergent Series: Insurgent</td>
 <td>6.2</td>
 <td>268250.0</td>
-<td>(Action, Science Fiction, Adventure, Thriller)</td>
+<td>(Action, Thriller, Adventure, Science Fiction)</td>
 <td>119.0</td>
 </tr>
 <tr>
@@ -13176,7 +13155,7 @@ Signed difference (TMDb - IMDb):
 <td>Star Wars: Episode VII - The Force Awakens</td>
 <td>7.7</td>
 <td>1013886.0</td>
-<td>(Science Fiction, Action, Adventure, Fantasy)</td>
+<td>(Science Fiction, Fantasy, Adventure, Action)</td>
 <td>136.0</td>
 </tr>
 <tr>
@@ -13192,7 +13171,7 @@ Signed difference (TMDb - IMDb):
 <td>Fast &amp; Furious 7</td>
 <td>7.1</td>
 <td>434109.0</td>
-<td>(Action, Crime, Thriller)</td>
+<td>(Crime, Thriller, Action)</td>
 <td>137.0</td>
 </tr>
 </tbody>
@@ -13457,7 +13436,7 @@ IMDb rating nulls: 1,376
 <td>2015</td>
 <td>6.9</td>
 <td>718366.0</td>
-<td>(Science Fiction, Action, Adventure, Thriller)</td>
+<td>(Science Fiction, Thriller, Adventure, Action)</td>
 <td>124.0</td>
 <td>6.70</td>
 </tr>
@@ -13471,7 +13450,7 @@ IMDb rating nulls: 1,376
 <td>2015</td>
 <td>8.1</td>
 <td>1189406.0</td>
-<td>(Science Fiction, Action, Adventure, Thriller)</td>
+<td>(Science Fiction, Thriller, Adventure, Action)</td>
 <td>120.0</td>
 <td>7.60</td>
 </tr>
@@ -13485,7 +13464,7 @@ IMDb rating nulls: 1,376
 <td>2015</td>
 <td>6.2</td>
 <td>268250.0</td>
-<td>(Action, Science Fiction, Adventure, Thriller)</td>
+<td>(Action, Thriller, Adventure, Science Fiction)</td>
 <td>119.0</td>
 <td>6.25</td>
 </tr>
@@ -13499,7 +13478,7 @@ IMDb rating nulls: 1,376
 <td>2015</td>
 <td>7.7</td>
 <td>1013886.0</td>
-<td>(Science Fiction, Action, Adventure, Fantasy)</td>
+<td>(Science Fiction, Fantasy, Adventure, Action)</td>
 <td>136.0</td>
 <td>7.60</td>
 </tr>
@@ -13513,7 +13492,7 @@ IMDb rating nulls: 1,376
 <td>2015</td>
 <td>7.1</td>
 <td>434109.0</td>
-<td>(Action, Crime, Thriller)</td>
+<td>(Crime, Thriller, Action)</td>
 <td>137.0</td>
 <td>7.20</td>
 </tr>
@@ -13664,7 +13643,7 @@ IMDb rating nulls: 1,376
 <td>2015</td>
 <td>6.9</td>
 <td>718366.0</td>
-<td>(Science Fiction, Action, Adventure, Thriller)</td>
+<td>(Science Fiction, Thriller, Adventure, Action)</td>
 <td>124.0</td>
 <td>6.70</td>
 <td>1.985414e+08</td>
@@ -13682,7 +13661,7 @@ IMDb rating nulls: 1,376
 <td>2015</td>
 <td>8.1</td>
 <td>1189406.0</td>
-<td>(Science Fiction, Action, Adventure, Thriller)</td>
+<td>(Science Fiction, Thriller, Adventure, Action)</td>
 <td>120.0</td>
 <td>7.60</td>
 <td>1.985414e+08</td>
@@ -13700,7 +13679,7 @@ IMDb rating nulls: 1,376
 <td>2015</td>
 <td>6.2</td>
 <td>268250.0</td>
-<td>(Action, Science Fiction, Adventure, Thriller)</td>
+<td>(Action, Thriller, Adventure, Science Fiction)</td>
 <td>119.0</td>
 <td>6.25</td>
 <td>1.455970e+08</td>
@@ -13718,7 +13697,7 @@ IMDb rating nulls: 1,376
 <td>2015</td>
 <td>7.7</td>
 <td>1013886.0</td>
-<td>(Science Fiction, Action, Adventure, Fantasy)</td>
+<td>(Science Fiction, Fantasy, Adventure, Action)</td>
 <td>136.0</td>
 <td>7.60</td>
 <td>2.647218e+08</td>
@@ -13736,7 +13715,7 @@ IMDb rating nulls: 1,376
 <td>2015</td>
 <td>7.1</td>
 <td>434109.0</td>
-<td>(Action, Crime, Thriller)</td>
+<td>(Crime, Thriller, Action)</td>
 <td>137.0</td>
 <td>7.20</td>
 <td>2.514857e+08</td>
@@ -13790,7 +13769,7 @@ IMDb rating nulls: 1,376
 <td>1966</td>
 <td>7.2</td>
 <td>11755.0</td>
-<td>(Drama, Sport, Action, Adventure)</td>
+<td>(Drama, Adventure, Sport, Action)</td>
 <td>176.0</td>
 <td>6.45</td>
 <td>NaN</td>
@@ -13808,7 +13787,7 @@ IMDb rating nulls: 1,376
 <td>1966</td>
 <td>8.0</td>
 <td>6580.0</td>
-<td>(Romance, Crime, Comedy, Mystery)</td>
+<td>(Crime, Romance, Comedy, Mystery)</td>
 <td>94.0</td>
 <td>7.25</td>
 <td>NaN</td>
@@ -13826,7 +13805,7 @@ IMDb rating nulls: 1,376
 <td>1966</td>
 <td>5.8</td>
 <td>10312.0</td>
-<td>(Crime, Action, Adventure, Comedy)</td>
+<td>(Crime, Comedy, Adventure, Action)</td>
 <td>80.0</td>
 <td>5.60</td>
 <td>NaN</td>
@@ -13867,9 +13846,7 @@ IMDb rating nulls: 1,376
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<hr/>
-<p><strong>Final Cleaned Dataset Summary</strong></p>
-<p><strong>Dataset Statistics:</strong></p>
+<h4 id="Final-Cleaned-Dataset-Summary">Final Cleaned Dataset Summary<a class="anchor-link" href="#Final-Cleaned-Dataset-Summary">¶</a></h4><p><strong>Dataset Statistics:</strong></p>
 <ul>
 <li>Total movies: 10,835</li>
 <li>Columns: 11</li>
@@ -13906,7 +13883,7 @@ IMDb rating nulls: 1,376
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
 <div class="highlight hl-ipython3"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="s2">"="</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
-<span class="nb">print</span><span class="p">(</span><span class="s2">"SECTION 3 COMPLETE - DATA CLEANING VALIDATED"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"DATA CLEANING VALIDATION"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="s2">"="</span><span class="o">*</span><span class="mi">80</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Final dataset: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> movies × </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="si">}</span><span class="s2"> columns"</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Columns: </span><span class="si">{</span><span class="s1">', '</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
@@ -13924,7 +13901,7 @@ IMDb rating nulls: 1,376
 <div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
 <div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
 <pre>================================================================================
-SECTION 3 COMPLETE - DATA CLEANING VALIDATED
+DATA CLEANING VALIDATION
 ================================================================================
 
 Final dataset: 10,835 movies × 15 columns
@@ -13937,16 +13914,302 @@ Memory usage: 2.7 MB
 </div>
 </div>
 </div>
-</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h3 id="Streaming-Platform-Integration">Streaming Platform Integration<a class="anchor-link" href="#Streaming-Platform-Integration">¶</a></h3><p><strong>Datasets:</strong></p>
+<ul>
+<li><strong>Streaming Catalog:</strong> 16,058 unique movies across 4 platforms (Netflix, Hulu, Disney+, Amazon Prime)</li>
+<li><strong>Platform Distribution:</strong> Amazon (48.6%), Netflix (38.0%), Hulu (9.2%), Disney+ (6.5%)</li>
+<li><strong>Multi-platform:</strong> Only 2.0% of streaming titles appear on 2+ platforms</li>
+</ul>
+<p><strong>Integration Approach:</strong></p>
+<ol>
+<li><strong>Theatrical Dataset Enhancement:</strong> Add availability flags (<code>on_netflix</code>, <code>on_hulu</code>, <code>on_disney</code>, <code>on_amazon</code>) to identify which theatrical releases (1960-2015) appeared on streaming platforms</li>
+<li><strong>Separate Streaming Catalog:</strong> Maintain unified streaming dataset with platform identifier for platform strategy analysis</li>
+</ol>
+<p><strong>Matching Method:</strong></p>
+<ul>
+<li>Normalize title + release year matching</li>
+<li>Limitations: Imperfect due to title variations, no IMDb IDs in streaming data</li>
+<li>Match rate: 19.0% of theatrical releases found on streaming platforms</li>
+</ul>
+<p><strong>Use Cases:</strong></p>
+<ul>
+<li>Compare financial performance of streaming-available vs theatrical-only releases</li>
+<li>Analyze which types of theatrical releases end up on streaming</li>
+<li>Study platform content strategies and catalog composition</li>
+</ul>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
 <div class="jp-Cell-inputWrapper" tabindex="0">
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [58]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span> 
+<div class="highlight hl-ipython3"><pre><span></span><span class="k">def</span><span class="w"> </span><span class="nf">title_cleaner</span><span class="p">(</span><span class="n">title</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Clean title of various potential issues"""</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">unidecode</span><span class="p">(</span><span class="n">title</span><span class="p">)</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    <span class="c1"># Remove content in parens (often year or descriptors)</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">'\([^)]*\)'</span><span class="p">,</span> <span class="s1">''</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
+    <span class="c1"># Remove special characters</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">'[^a-z0-9\s]'</span><span class="p">,</span> <span class="s1">''</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
+    <span class="c1"># Remove extra whitespace</span>
+    <span class="n">title</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="sa">r</span><span class="s1">' {2,}'</span><span class="p">,</span> <span class="s1">' '</span><span class="p">,</span> <span class="n">title</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="n">title</span>
+
+<span class="c1"># Create title+year matching keys</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">create_match_key</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">title_col</span><span class="o">=</span><span class="s1">'title'</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">"""Create normalized title_year key for matching"""</span>
+    <span class="n">title_series</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">title_col</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">title_cleaner</span><span class="p">)</span>
+    
+    <span class="k">return</span> <span class="p">(</span><span class="n">title_series</span> <span class="o">+</span> <span class="s1">'_'</span> <span class="o">+</span> 
+            <span class="n">df</span><span class="p">[</span><span class="s1">'release_year'</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">))</span>
+
+
+<span class="c1"># Filter to movies only (drop TV shows)</span>
+<span class="n">netflix_movies</span> <span class="o">=</span> <span class="n">netflix_titles_clean_df</span><span class="p">[</span><span class="n">netflix_titles_clean_df</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'Movie'</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">hulu_movies</span> <span class="o">=</span> <span class="n">hulu_titles_clean_df</span><span class="p">[</span><span class="n">hulu_titles_clean_df</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'Movie'</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">disney_movies</span> <span class="o">=</span> <span class="n">disney_plus_titles_clean_df</span><span class="p">[</span><span class="n">disney_plus_titles_clean_df</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'Movie'</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+<span class="n">amazon_movies</span> <span class="o">=</span> <span class="n">amazon_prime_titles_clean_df</span><span class="p">[</span><span class="n">amazon_prime_titles_clean_df</span><span class="p">[</span><span class="s1">'type'</span><span class="p">]</span> <span class="o">==</span> <span class="s1">'Movie'</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Netflix movies: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">netflix_movies</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Hulu movies: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">hulu_movies</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Disney+ movies: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">disney_movies</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Amazon Prime movies: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">amazon_movies</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># Create matching sets by platform</span>
+<span class="n">netflix_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">create_match_key</span><span class="p">(</span><span class="n">netflix_movies</span><span class="p">))</span>
+<span class="n">hulu_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">create_match_key</span><span class="p">(</span><span class="n">hulu_movies</span><span class="p">))</span>
+<span class="n">disney_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">create_match_key</span><span class="p">(</span><span class="n">disney_movies</span><span class="p">))</span>
+<span class="n">amazon_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">create_match_key</span><span class="p">(</span><span class="n">amazon_movies</span><span class="p">))</span>
+
+<span class="c1"># Create theatrical matching keys</span>
+<span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'_match_key'</span><span class="p">]</span> <span class="o">=</span> <span class="n">create_match_key</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">,</span> <span class="n">title_col</span><span class="o">=</span><span class="s1">'original_title'</span><span class="p">)</span>
+<span class="n">merged_xmdb_title_set</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'_match_key'</span><span class="p">])</span>
+
+<span class="c1"># Check overlap</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Unique movies by platform:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Netflix: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">netflix_set</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Hulu: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">hulu_set</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Disney+: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">disney_set</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Amazon: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">amazon_set</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># Calculate overlap</span>
+<span class="n">all_movies</span> <span class="o">=</span> <span class="n">netflix_set</span> <span class="o">|</span> <span class="n">hulu_set</span> <span class="o">|</span> <span class="n">disney_set</span> <span class="o">|</span> <span class="n">amazon_set</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Total unique movies across all platforms: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_movies</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="c1"># Multi-platform movies</span>
+<span class="n">on_multiple</span> <span class="o">=</span> <span class="p">(</span><span class="n">netflix_set</span> <span class="o">&amp;</span> <span class="n">hulu_set</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">netflix_set</span> <span class="o">&amp;</span> <span class="n">disney_set</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">netflix_set</span> <span class="o">&amp;</span> <span class="n">amazon_set</span><span class="p">)</span> <span class="o">|</span> \
+              <span class="p">(</span><span class="n">hulu_set</span> <span class="o">&amp;</span> <span class="n">disney_set</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">hulu_set</span> <span class="o">&amp;</span> <span class="n">amazon_set</span><span class="p">)</span> <span class="o">|</span> <span class="p">(</span><span class="n">disney_set</span> <span class="o">&amp;</span> <span class="n">amazon_set</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Movies on 2+ platforms: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">on_multiple</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">on_multiple</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">all_movies</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%)"</span><span class="p">)</span>
 </pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>Netflix movies: 6,131
+Hulu movies: 1,484
+Disney+ movies: 1,052
+Amazon Prime movies: 7,814
+
+Unique movies by platform:
+Netflix: 6,110
+Hulu: 1,482
+Disney+: 1,052
+Amazon: 7,746
+
+Total unique movies across all platforms: 16,058
+Movies on 2+ platforms: 323 (2.0%)
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [59]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Add platform identifier to each dataset</span>
+<span class="n">netflix_movies</span><span class="p">[</span><span class="s1">'platform'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'Netflix'</span>
+<span class="n">hulu_movies</span><span class="p">[</span><span class="s1">'platform'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'Hulu'</span>  
+<span class="n">disney_movies</span><span class="p">[</span><span class="s1">'platform'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'Disney+'</span>
+<span class="n">amazon_movies</span><span class="p">[</span><span class="s1">'platform'</span><span class="p">]</span> <span class="o">=</span> <span class="s1">'Amazon Prime'</span>
+
+<span class="c1"># Merge all platforms</span>
+<span class="n">streaming_catalog_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span>
+    <span class="n">netflix_movies</span><span class="p">,</span> 
+    <span class="n">hulu_movies</span><span class="p">,</span> 
+    <span class="n">disney_movies</span><span class="p">,</span> 
+    <span class="n">amazon_movies</span>
+<span class="p">],</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+<span class="c1"># Remove non-critical columns</span>
+<span class="n">streaming_catalog_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span>
+    <span class="s1">'show_id'</span><span class="p">,</span> <span class="s1">'type'</span><span class="p">,</span> <span class="s1">'director'</span><span class="p">,</span> <span class="s1">'cast'</span><span class="p">,</span> <span class="s1">'country'</span><span class="p">,</span> <span class="s1">'date_added'</span><span class="p">,</span> <span class="s1">'rating'</span><span class="p">],</span>
+    <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="n">errors</span><span class="o">=</span><span class="s1">'ignore'</span>
+<span class="p">)</span>
+
+<span class="c1"># Change duration from values like '90 mins' to 90</span>
+<span class="n">cleaned_duration</span> <span class="o">=</span> <span class="n">streaming_catalog_df</span><span class="p">[</span><span class="s1">'duration'</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">str</span><span class="p">)</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">r</span><span class="s1">' +min'</span><span class="p">,</span> <span class="s1">''</span><span class="p">,</span> <span class="n">regex</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">numeric_duration</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_numeric</span><span class="p">(</span><span class="n">cleaned_duration</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">'coerce'</span><span class="p">)</span>
+<span class="n">streaming_catalog_df</span><span class="p">[</span><span class="s1">'duration'</span><span class="p">]</span> <span class="o">=</span> <span class="n">numeric_duration</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+
+<span class="n">display</span><span class="p">(</span><span class="n">streaming_catalog_df</span><span class="o">.</span><span class="n">head</span><span class="p">())</span>
+<span class="n">display</span><span class="p">(</span><span class="n">streaming_catalog_df</span><span class="o">.</span><span class="n">info</span><span class="p">())</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Total streaming entries: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">streaming_catalog_df</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Unique movies: </span><span class="si">{</span><span class="n">streaming_catalog_df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="s1">'title'</span><span class="p">,</span><span class="w"> </span><span class="s1">'release_year'</span><span class="p">])</span><span class="o">.</span><span class="n">ngroups</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Platforms: </span><span class="si">{</span><span class="n">streaming_catalog_df</span><span class="p">[</span><span class="s1">'platform'</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedHTMLCommon jp-RenderedHTML jp-OutputArea-output" data-mime-type="text/html" tabindex="0">
+<div>
+<style scoped="">
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+<thead>
+<tr style="text-align: right;">
+<th></th>
+<th>title</th>
+<th>release_year</th>
+<th>duration</th>
+<th>listed_in</th>
+<th>description</th>
+<th>platform</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<th>0</th>
+<td>Dick Johnson Is Dead</td>
+<td>2020</td>
+<td>90.0</td>
+<td>Documentaries</td>
+<td>As her father nears the end of his life, filmm...</td>
+<td>Netflix</td>
+</tr>
+<tr>
+<th>1</th>
+<td>My Little Pony: A New Generation</td>
+<td>2021</td>
+<td>91.0</td>
+<td>Children &amp; Family Movies</td>
+<td>Equestria's divided. But a bright-eyed hero be...</td>
+<td>Netflix</td>
+</tr>
+<tr>
+<th>2</th>
+<td>Sankofa</td>
+<td>1993</td>
+<td>125.0</td>
+<td>Dramas, Independent Movies, International Movies</td>
+<td>On a photo shoot in Ghana, an American model s...</td>
+<td>Netflix</td>
+</tr>
+<tr>
+<th>3</th>
+<td>The Starling</td>
+<td>2021</td>
+<td>104.0</td>
+<td>Comedies, Dramas</td>
+<td>A woman adjusting to life after a loss contend...</td>
+<td>Netflix</td>
+</tr>
+<tr>
+<th>4</th>
+<td>Je Suis Karl</td>
+<td>2021</td>
+<td>127.0</td>
+<td>Dramas, International Movies</td>
+<td>After most of her family is murdered in a terr...</td>
+<td>Netflix</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>&lt;class 'pandas.core.frame.DataFrame'&gt;
+RangeIndex: 16481 entries, 0 to 16480
+Data columns (total 6 columns):
+ #   Column        Non-Null Count  Dtype  
+---  ------        --------------  -----  
+ 0   title         16481 non-null  object 
+ 1   release_year  16481 non-null  int64  
+ 2   duration      16481 non-null  float64
+ 3   listed_in     16481 non-null  object 
+ 4   description   16478 non-null  object 
+ 5   platform      16481 non-null  object 
+dtypes: float64(1), int64(1), object(4)
+memory usage: 772.7+ KB
+</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>None</pre>
+</div>
+</div>
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>
+Total streaming entries: 16,481
+Unique movies: 16,171
+
+Platforms: platform
+Amazon Prime    7814
+Netflix         6131
+Hulu            1484
+Disney+         1052
+Name: count, dtype: int64
+</pre>
 </div>
 </div>
 </div>
@@ -13958,12 +14221,74 @@ Memory usage: 2.7 MB
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<h2 id="4.-Update-your-data-store">4. Update your data store<a class="anchor-link" href="#4.-Update-your-data-store">¶</a></h2><p>Update your local database/data store with the cleaned data, following best practices for storing your cleaned data:</p>
-<ul>
-<li>Must maintain different instances / versions of data (raw and cleaned data)</li>
-<li>Must name the dataset files informatively</li>
-<li>Ensure both the raw and cleaned data is saved to your database/data store</li>
-</ul>
+<hr/>
+<p><strong>How many theatrical releases (1960-2015) appear on streaming?</strong></p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [60]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Calculate overlap</span>
+<span class="n">matches</span> <span class="o">=</span> <span class="n">all_movies</span> <span class="o">&amp;</span> <span class="n">merged_xmdb_title_set</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Theater -&gt; Streaming Match Analysis:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Theatrical releases: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">merged_xmdb_title_set</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Streaming catalog: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">all_movies</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Matches: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">matches</span><span class="p">)</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">merged_xmdb_title_set</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">% of theatrical)"</span><span class="p">)</span>
+
+<span class="c1"># Which platforms have theatrical releases?</span>
+<span class="n">netflix_matches</span> <span class="o">=</span> <span class="n">netflix_set</span> <span class="o">&amp;</span> <span class="n">merged_xmdb_title_set</span>
+<span class="n">hulu_matches</span> <span class="o">=</span> <span class="n">hulu_set</span> <span class="o">&amp;</span> <span class="n">merged_xmdb_title_set</span>
+<span class="n">disney_matches</span> <span class="o">=</span> <span class="n">disney_set</span> <span class="o">&amp;</span> <span class="n">merged_xmdb_title_set</span>
+<span class="n">amazon_matches</span> <span class="o">=</span> <span class="n">amazon_set</span> <span class="o">&amp;</span> <span class="n">merged_xmdb_title_set</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Theater releases by platform:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Netflix: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">netflix_matches</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Hulu: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">hulu_matches</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Disney+: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">disney_matches</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Amazon: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">amazon_matches</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>
+Theater -&gt; Streaming Match Analysis:
+Theatrical releases: 10,832
+Streaming catalog: 16,058
+Matches: 2,063 (19.0% of theatrical)
+
+Theater releases by platform:
+Netflix: 969
+Hulu: 308
+Disney+: 388
+Amazon: 538
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<hr/>
+<p><strong>Add availability flags to theatrical dataset</strong></p>
 </div>
 </div>
 </div>
@@ -13972,10 +14297,150 @@ Memory usage: 2.7 MB
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [61]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#FILL IN - saving data</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Add streaming platform availability flags</span>
+
+<span class="k">if</span> <span class="s1">'_match_key'</span> <span class="ow">in</span> <span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+    <span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'on_netflix'</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'_match_key'</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">netflix_set</span><span class="p">)</span>
+    <span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'on_hulu'</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'_match_key'</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">hulu_set</span><span class="p">)</span>
+    <span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'on_disney'</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'_match_key'</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">disney_set</span><span class="p">)</span>
+    <span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'on_amazon'</span><span class="p">]</span> <span class="o">=</span> <span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'_match_key'</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">amazon_set</span><span class="p">)</span>
+
+<span class="c1"># Add streaming flags</span>
+<span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'on_streaming'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'on_netflix'</span><span class="p">]</span> <span class="o">|</span> 
+    <span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'on_hulu'</span><span class="p">]</span> <span class="o">|</span> 
+    <span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'on_disney'</span><span class="p">]</span> <span class="o">|</span> 
+    <span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'on_amazon'</span><span class="p">]</span>
+<span class="p">)</span>
+
+<span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'streaming_platforms'</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'on_netflix'</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">+</span> 
+    <span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'on_hulu'</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">+</span> 
+    <span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'on_disney'</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span> <span class="o">+</span> 
+    <span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'on_amazon'</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">int</span><span class="p">)</span>
+<span class="p">)</span>
+
+<span class="c1"># Drop temporary matching key</span>
+<span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">'_match_key'</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">'ignore'</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [62]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Validation</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="si">{</span><span class="s1">'='</span><span class="o">*</span><span class="mi">70</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">"STREAMING AVAILABILITY ANALYSIS"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="si">{</span><span class="s1">'='</span><span class="o">*</span><span class="mi">70</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Theatrical releases: </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">)</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"Available on streaming: </span><span class="si">{</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'on_streaming'</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2"> (</span><span class="si">{</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'on_streaming'</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">/</span><span class="nb">len</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">)</span><span class="o">*</span><span class="mi">100</span><span class="si">:</span><span class="s2">.1f</span><span class="si">}</span><span class="s2">%)"</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">By platform:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Netflix: </span><span class="si">{</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'on_netflix'</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Hulu: </span><span class="si">{</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'on_hulu'</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Disney+: </span><span class="si">{</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'on_disney'</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"  Amazon: </span><span class="si">{</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'on_amazon'</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="si">:</span><span class="s2">,</span><span class="si">}</span><span class="s2">"</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">"</span><span class="se">\n</span><span class="s2">Multi-platform availability:"</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">merged_xmdb_df</span><span class="p">[</span><span class="s1">'streaming_platforms'</span><span class="p">]</span><span class="o">.</span><span class="n">value_counts</span><span class="p">()</span><span class="o">.</span><span class="n">sort_index</span><span class="p">())</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell-outputWrapper">
+<div class="jp-Collapser jp-OutputCollapser jp-Cell-outputCollapser">
+</div>
+<div class="jp-OutputArea jp-Cell-outputArea">
+<div class="jp-OutputArea-child">
+<div class="jp-OutputPrompt jp-OutputArea-prompt"></div>
+<div class="jp-RenderedText jp-OutputArea-output" data-mime-type="text/plain" tabindex="0">
+<pre>
+======================================================================
+STREAMING AVAILABILITY ANALYSIS
+======================================================================
+Theatrical releases: 10,835
+Available on streaming: 2,063 (19.0%)
+
+By platform:
+  Netflix: 969
+  Hulu: 308
+  Disney+: 388
+  Amazon: 538
+
+Multi-platform availability:
+streaming_platforms
+0    8772
+1    1929
+2     128
+3       6
+Name: count, dtype: int64
+</pre>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<hr/>
+<p><strong>Data Wrangling Complete</strong></p>
+<p>All datasets have been cleaned, merged, and validated. The theatrical dataset now includes streaming availability flags, enabling comprehensive analysis of how theatrical releases perform compared to their availability on modern streaming platforms.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<h2 id="4.-Data-Storage-Implementation">4. Data Storage Implementation<a class="anchor-link" href="#4.-Data-Storage-Implementation">¶</a></h2><p><strong>Theatrical Movies Dataset:</strong></p>
+<ul>
+<li>File: <code>imdb_tmdb_theatrical_movies_merged_clean.csv</code></li>
+<li>Rows: 10,835 movies (1960-2015)</li>
+<li>Columns: 21 (includes 6 streaming availability flags)</li>
+<li>Size: 1.6MB</li>
+</ul>
+<p><strong>Streaming Catalog Dataset:</strong></p>
+<ul>
+<li>File: <code>streaming_movies_merged_clean.csv</code></li>
+<li>Rows: 16,481 entries across 4 platforms</li>
+<li>Unique movies: 16,171</li>
+<li>Columns: 6 (title, year, duration, genres, description, platform)</li>
+<li>Size: 4.1MB</li>
+</ul>
+<p><strong>Raw Data Preserved:</strong>
+All original downloaded files remain in <code>data/raw/</code> directory for reproducibility.</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [67]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="n">merged_xmdb_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">CLEAN_DATA_PATH</span><span class="si">}</span><span class="s1">/imdb_tmdb_theatrical_movies_merged_clean.csv'</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">streaming_catalog_df</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="sa">f</span><span class="s1">'</span><span class="si">{</span><span class="n">CLEAN_DATA_PATH</span><span class="si">}</span><span class="s1">/streaming_movies_merged_clean.csv'</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -13999,7 +14464,8 @@ Memory usage: 2.7 MB
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p><em>Research question:</em> FILL IN from answer to Step 1</p>
+<p><strong>Visualization 1: Financial Performance Over Time</strong></p>
+<p><strong>Purpose</strong>: Shows if there's a budget/revenue pattern for movies that ended up on streaming.</p>
 </div>
 </div>
 </div>
@@ -14008,10 +14474,12 @@ Memory usage: 2.7 MB
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [69]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#Visual 1 - FILL IN</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Inflation-adjusted budget/revenue by decade</span>
+<span class="c1"># Compare streaming-available vs theatrical-only</span>
+<span class="c1"># Shows whether streaming movies had different financial profiles</span>
 </pre></div>
 </div>
 </div>
@@ -14024,7 +14492,8 @@ Memory usage: 2.7 MB
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p><em>Answer to research question:</em> FILL IN</p>
+<p><strong>Visualization 2: Rating Comparison</strong></p>
+<p><strong>Purpose</strong>: Determines if streaming-available movies have different audience reception</p>
 </div>
 </div>
 </div>
@@ -14033,10 +14502,12 @@ Memory usage: 2.7 MB
 <div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
 </div>
 <div class="jp-InputArea jp-Cell-inputArea">
-<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-InputPrompt jp-InputArea-prompt">In [70]:</div>
 <div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
 <div class="cm-editor cm-s-jupyter">
-<div class="highlight hl-ipython3"><pre><span></span><span class="c1">#Visual 2 - FILL IN</span>
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># TMDb vs IMDb ratings distribution</span>
+<span class="c1"># Overlay: streaming-available vs not</span>
+<span class="c1"># Shows audience reception patterns</span>
 </pre></div>
 </div>
 </div>
@@ -14049,7 +14520,107 @@ Memory usage: 2.7 MB
 </div>
 <div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
 </div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
-<p><em>Answer to research question:</em> FILL IN</p>
+<p><strong>Visualization 3: Genre Distribution</strong></p>
+<p><strong>Purpose</strong>: Reveals if streaming platforms favor certain genres</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [71]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Top genres in theatrical releases</span>
+<span class="c1"># Compare to streaming platform genre preferences</span>
+<span class="c1"># Shows content characteristic differences</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="jp-Cell jp-MarkdownCell jp-Notebook-cell">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea"><div class="jp-InputPrompt jp-InputArea-prompt">
+</div><div class="jp-RenderedHTMLCommon jp-RenderedMarkdown jp-MarkdownOutput" data-mime-type="text/markdown">
+<p><strong>Visualization 4: Platform Strategy Matrix</strong></p>
+<p><strong>Purpose</strong>: Shows how different platforms curate content</p>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [72]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span><span class="c1"># Heatmap showing platform vs genre</span>
+<span class="c1"># Or: Platform vs decade of release</span>
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span> 
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span> 
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span> 
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</div><div class="jp-Cell jp-CodeCell jp-Notebook-cell jp-mod-noOutputs">
+<div class="jp-Cell-inputWrapper" tabindex="0">
+<div class="jp-Collapser jp-InputCollapser jp-Cell-inputCollapser">
+</div>
+<div class="jp-InputArea jp-Cell-inputArea">
+<div class="jp-InputPrompt jp-InputArea-prompt">In [ ]:</div>
+<div class="jp-CodeMirrorEditor jp-Editor jp-InputArea-editor" data-type="inline">
+<div class="cm-editor cm-s-jupyter">
+<div class="highlight hl-ipython3"><pre><span></span> 
+</pre></div>
+</div>
 </div>
 </div>
 </div>
