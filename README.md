@@ -26,12 +26,14 @@ Both projects follow rigorous data science methodologies, including systematic d
 **Dataset:** 10,866 movies from TMDb (1960-2015)
 
 **Key Questions:**
+
 - How does budget relate to revenue?
 - Is there a relationship between critical reception and commercial success?
 - Do certain genres perform better financially or critically?
 - What are the characteristics of the most successful movies?
 
 **Key Findings:**
+
 - Budget-revenue correlation: **r = 0.567** (moderate positive relationship)
 - Rating-revenue correlation: **r = 0.240** (weak relationship)
 - Top revenue genres: Animation ($256M), Adventure ($251M), Fantasy ($227M)
@@ -50,11 +52,13 @@ Both projects follow rigorous data science methodologies, including systematic d
 **Dataset:** 27,000+ movies across 6 data sources (TMDb, IMDb, Netflix, Hulu, Disney+, Amazon Prime)
 
 **Key Questions:**
+
 - How do streaming platforms compare to theatrical releases?
 - What content characteristics do platforms prioritize?
 - Do platforms employ selective licensing strategies?
 
 **Key Findings:**
+
 - Only **19% of theatrical releases** available on streaming
 - Streaming-available movies have **+38% higher budgets** and **+93% higher revenue**
 - Streaming platforms show **+15.3 percentage points** in Family genre representation
@@ -68,15 +72,15 @@ Both projects follow rigorous data science methodologies, including systematic d
 
 ## 📊 Project Comparison
 
-| Aspect                    | Project 1                          | Project 2                          |
-| ------------------------- | ---------------------------------- | ---------------------------------- |
-| **Primary Focus**         | Factors of movie success           | Streaming platform curation        |
-| **Dataset Size**          | 10,866 movies                      | 27,000+ movies                     |
-| **Time Period**           | 1960-2015                          | 1960-2025                          |
-| **Data Sources**          | TMDb                               | TMDb, IMDb, 4 streaming platforms  |
-| **Analysis Type**         | Exploratory Data Analysis          | Data Wrangling + Analysis          |
-| **Key Insight**           | Budget drives success              | Platforms selectively license     |
-| **Statistical Testing**   | Correlation analysis               | T-tests, correlation analysis     |
+| Aspect                  | Project 1                 | Project 2                         |
+| ----------------------- | ------------------------- | --------------------------------- |
+| **Primary Focus**       | Factors of movie success  | Streaming platform curation       |
+| **Dataset Size**        | 10,866 movies             | 27,000+ movies                    |
+| **Time Period**         | 1960-2015                 | 1960-2025                         |
+| **Data Sources**        | TMDb                      | TMDb, IMDb, 4 streaming platforms |
+| **Analysis Type**       | Exploratory Data Analysis | Data Wrangling + Analysis         |
+| **Key Insight**         | Budget drives success     | Platforms selectively license     |
+| **Statistical Testing** | Correlation analysis      | T-tests, correlation analysis     |
 
 ---
 
@@ -106,14 +110,17 @@ Both projects follow rigorous data science methodologies, including systematic d
 ### Common Themes
 
 1. **Financial Performance Matters**
+
    - Both projects reveal that budget investment strongly correlates with commercial success
    - Higher-budget films tend to generate higher revenues
 
 2. **Genre Selection is Critical**
+
    - Family-friendly spectacle genres (Animation, Adventure, Fantasy) dominate box office
    - Prestige genres (Documentary, History) earn critical acclaim but modest revenues
 
 3. **Critical Reception Has Limited Impact**
+
    - Ratings show weak correlation with commercial success
    - Factors beyond critical acclaim (marketing, star power, timing) play larger roles
 
@@ -155,21 +162,25 @@ data-analyst-nanodegree-projects/
 Both projects follow rigorous data science best practices:
 
 ### Data Assessment
+
 - Systematic identification of quality and tidiness issues
 - Documentation of missing values, duplicates, and data inconsistencies
 - Validation of data sources and cross-referencing
 
 ### Data Cleaning
+
 - Data-driven decision making with empirical justification
 - Preservation of raw data separately from cleaned data
 - Comprehensive validation after each transformation
 
 ### Analysis
+
 - Exploratory data analysis with multiple visualization types
 - Statistical testing (correlation, t-tests)
 - Clear documentation of findings and limitations
 
 ### Professional Standards
+
 - Reproducible workflows with clear dependencies
 - Comprehensive documentation and justification
 - Acknowledgment of limitations and future work
