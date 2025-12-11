@@ -8,12 +8,13 @@ A collection of comprehensive data analysis projects exploring movie industry dy
 
 ## 🎯 Repository Overview
 
-This repository contains two major data analysis projects that examine different aspects of the film industry:
+This repository contains three major data analysis projects that examine different aspects of the film industry:
 
 1. **Project 1: Investigate a Dataset** - Analyzes factors associated with movie financial success and audience reception
 2. **Project 2: Data Wrangling** - Examines how streaming platforms curate theatrical movie content
+3. **Project 3: Data Visualization** - Transforms streaming curation findings into polished explanatory visualizations
 
-Both projects follow rigorous data science methodologies, including systematic data assessment, cleaning, exploratory analysis, and statistical validation.
+All projects follow rigorous data science methodologies, including systematic data assessment, cleaning, exploratory analysis, and statistical validation.
 
 ---
 
@@ -70,17 +71,41 @@ Both projects follow rigorous data science methodologies, including systematic d
 
 ---
 
+### 📊 [Project 3: The Streaming Era Divide - Data Visualization](./project3/)
+
+**Focus:** Transforming data insights into polished exploratory and explanatory visualizations
+
+**Dataset:** 10,835 theatrical movies + 16,481 streaming titles from Project 2
+
+**Key Questions:**
+
+- Which decades and genres dominate streaming catalogs?
+- Do streaming movies differ financially from theatrical-only releases?
+- How do platforms differentiate through genre curation?
+
+**Key Visualizations:**
+
+1. **Recency Bias Histogram:** 72% of streaming content from 2000s-2010s
+2. **ROI Box Plot:** 51-point median ROI advantage for streaming movies
+3. **Genre Heatmap:** Disney+ 24.5% Family content (10x competitors)
+
+**Bottom Line:** Streaming platforms are strategic curators, not passive distributors. They cherry-pick proven theatrical winners, focus on recent releases, and differentiate through genre specialization.
+
+📖 **[Read Full Project Details →](./project3/README.md)**
+
+---
+
 ## 📊 Project Comparison
 
-| Aspect                  | Project 1                 | Project 2                         |
-| ----------------------- | ------------------------- | --------------------------------- |
-| **Primary Focus**       | Factors of movie success  | Streaming platform curation       |
-| **Dataset Size**        | 10,866 movies             | 27,000+ movies                    |
-| **Time Period**         | 1960-2015                 | 1960-2025                         |
-| **Data Sources**        | TMDb                      | TMDb, IMDb, 4 streaming platforms |
-| **Analysis Type**       | Exploratory Data Analysis | Data Wrangling + Analysis         |
-| **Key Insight**         | Budget drives success     | Platforms selectively license     |
-| **Statistical Testing** | Correlation analysis      | T-tests, correlation analysis     |
+| Aspect                  | Project 1                 | Project 2                         | Project 3                           |
+| ----------------------- | ------------------------- | --------------------------------- | ----------------------------------- |
+| **Primary Focus**       | Factors of movie success  | Streaming platform curation       | Data visualization & communication  |
+| **Dataset Size**        | 10,866 movies             | 27,000+ movies                    | 10,835 theatrical + 16,481 streaming|
+| **Time Period**         | 1960-2015                 | 1960-2025                         | 1960-2015                           |
+| **Data Sources**        | TMDb                      | TMDb, IMDb, 4 streaming platforms | Cleaned data from Project 2         |
+| **Analysis Type**       | Exploratory Data Analysis | Data Wrangling + Analysis         | EDA + Explanatory Visualization     |
+| **Key Insight**         | Budget drives success     | Platforms selectively license     | Strategic curation revealed visually|
+| **Statistical Testing** | Correlation analysis      | T-tests, correlation analysis     | Visual distribution comparison      |
 
 ---
 
@@ -132,6 +157,7 @@ Both projects follow rigorous data science methodologies, including systematic d
 
 - **Project 1** establishes what makes movies successful (budget, genre, engagement)
 - **Project 2** reveals how streaming platforms apply these insights (selective licensing of successful content)
+- **Project 3** communicates these findings through polished visualizations that demonstrate strategic curation patterns
 
 ---
 
@@ -152,6 +178,13 @@ data-analyst-nanodegree-projects/
 │   ├── data_wrangling_project_starter.ipynb
 │   ├── datasets_info.md
 │   └── README.md
+├── project3/
+│   ├── data/
+│   │   ├── imdb_tmdb_theatrical_movies_merged_clean.csv
+│   │   └── streaming_movies_merged_clean.csv
+│   ├── Part_I_exploration_template.ipynb
+│   ├── Part_II_explanatory_template.ipynb
+│   └── README.md
 └── README.md
 ```
 
@@ -159,7 +192,7 @@ data-analyst-nanodegree-projects/
 
 ## 🎓 Methodology Highlights
 
-Both projects follow rigorous data science best practices:
+All projects follow rigorous data science best practices:
 
 ### Data Assessment
 
